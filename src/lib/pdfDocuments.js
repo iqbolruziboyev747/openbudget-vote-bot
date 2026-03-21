@@ -1,6 +1,9 @@
 import { SELLER_LEGAL_INFO, CONTRACT_SECTIONS } from './legalInfo';
 
-const SITE_URL = 'https://fathrobot--fathrobot-5c48d.us-central1.hosted.app';
+function getSiteUrl() {
+  if (typeof window !== 'undefined') return window.location.origin;
+  return process.env.NEXT_PUBLIC_BASE_URL || '';
+}
 
 /* ================================================================
    YORDAMCHI FUNKSIYALAR
@@ -225,7 +228,7 @@ async function drawQrVerificationBlock(doc, vCode, qrDataUrl, y) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
   doc.setTextColor(3, 105, 161);
-  doc.text(`${SITE_URL}/verify?code=${vCode}`, 52, y + 20);
+  doc.text(`${getSiteUrl()}/verify?code=${vCode}`, 52, y + 20);
 
   // Tekshiruv kodi
   doc.setFont('helvetica', 'bold');
@@ -313,7 +316,7 @@ export async function downloadCertificatePdf(license, toDateLabel) {
 
   const docNumber = cert.documentNumber || `CERT-${(license.id || '').slice(0, 8).toUpperCase()}`;
   const vCode = generateVerificationCode(docNumber, license.licenseKey, buyer.fullName);
-  const verifyUrl = `${SITE_URL}/verify?code=${vCode}`;
+  const verifyUrl = `${getSiteUrl()}/verify?code=${vCode}`;
 
   let qrDataUrl = '';
   try { qrDataUrl = await generateQrDataUrl(verifyUrl); } catch {}
@@ -382,7 +385,7 @@ export async function downloadContractPdf(license, toDateLabel) {
 
   const docNumber = contract.contractNumber || `CTR-${(license.id || '').slice(0, 8).toUpperCase()}`;
   const vCode = generateVerificationCode(docNumber, license.licenseKey, buyer.fullName);
-  const verifyUrl = `${SITE_URL}/verify?code=${vCode}`;
+  const verifyUrl = `${getSiteUrl()}/verify?code=${vCode}`;
 
   let qrDataUrl = '';
   try { qrDataUrl = await generateQrDataUrl(verifyUrl); } catch {}

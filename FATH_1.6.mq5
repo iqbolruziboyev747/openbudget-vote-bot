@@ -497,6 +497,10 @@ int OnInit()
       g_lastHeartbeat = TimeCurrent();
    }
 
+   // Timer o'rnatish - dam olish kunlarida tick kelmasa ham heartbeat ishlashi uchun
+   // 5 daqiqa (300 sekund) oraliqda OnTimer chaqiriladi
+   EventSetTimer(300);
+
    // Telegram test xabari yuborish
    if(SendTelegramSignals && StringLen(TelegramBotToken) > 10 && StringLen(TelegramChatID) > 1)
    {
@@ -1032,8 +1036,54 @@ else if(sell_trigger && !buy_trigger && sellCanTrade)
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
 {
+   EventKillTimer();
    DeletePanel("FATH_PANEL_");
    Comment("");
+}
+
+//+------------------------------------------------------------------+
+//| Timer — tick kelmasa ham heartbeat va litsenziya tekshiruvi       |
+//| Dam olish kunlarida XAUUSD tick bermaydi, shuning uchun          |
+//| OnTimer orqali har 5 daqiqada heartbeat yuboriladi               |
+//+------------------------------------------------------------------+
+void OnTimer()
+{
+   if(!EnableSiteTradeSync || StringLen(SiteLicenseKey) < 8)
+      return;
+
+   // Heartbeat vaqti kelganmi?
+   if(TimeCurrent() - g_lastHeartbeat >= HEARTBEAT_INTERVAL_SEC)
+   {
+      bool hb = SendHeartbeatToServer();
+      if(!hb)
+      {
+         g_heartbeatFailCount++;
+         g_lastHeartbeat = TimeCurrent() - HEARTBEAT_INTERVAL_SEC + 300;
+         if(g_heartbeatFailCount >= MAX_HEARTBEAT_FAILS)
+         {
+            g_licenseValid = false;
+            Print("FATH ROBOT: OnTimer - ", MAX_HEARTBEAT_FAILS, " ta ketma-ket heartbeat xatosi. EA bloklanmoqda.");
+            ExpertRemove();
+            return;
+         }
+         else
+         {
+            Print("FATH ROBOT: OnTimer - Heartbeat muvaffaqiyatsiz (", g_heartbeatFailCount, "/", MAX_HEARTBEAT_FAILS, ")");
+         }
+      }
+      else
+      {
+         g_heartbeatFailCount = 0;
+         g_lastHeartbeat = TimeCurrent();
+      }
+   }
+
+   // Litsenziya yaroqsiz bo'lsa EA ni olib tashlash
+   if(RequireLicenseValidation && !g_licenseValid)
+   {
+      Print("FATH ROBOT: OnTimer - Litsenziya yaroqsiz, EA o'chirilmoqda.");
+      ExpertRemove();
+   }
 }
 //+------------------------------------------------------------------+
 

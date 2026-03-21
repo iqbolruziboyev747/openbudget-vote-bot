@@ -36,6 +36,13 @@ export async function POST(request) {
         youtubeUrl: String(data.youtubeUrl || '').trim(),
         facebookUrl: String(data.facebookUrl || '').trim(),
         guideVideoUrl: String(data.guideVideoUrl || '').trim(),
+        testVideos: Array.isArray(data.testVideos)
+          ? data.testVideos.map((v) => ({
+              title: String(v.title || '').trim(),
+              url: String(v.url || '').trim(),
+              storagePath: String(v.storagePath || v.objectPath || '').trim(),
+            })).filter((v) => v.url)
+          : [],
         sellerBrand: String(data.sellerBrand || '').trim(),
         sellerOwnerFullName: String(data.sellerOwnerFullName || '').trim(),
         sellerLegalForm: String(data.sellerLegalForm || '').trim(),
@@ -58,6 +65,26 @@ export async function POST(request) {
       );
 
       return Response.json({ ok: true, profile }, { status: 200 });
+    }
+
+    if (type === 'terms_of_use') {
+      const sections = Array.isArray(data.sections) ? data.sections : [];
+      const sanitized = sections.map((s) => ({
+        title: String(s.title || '').trim(),
+        content: String(s.content || '').trim(),
+        items: Array.isArray(s.items) ? s.items.map((i) => String(i || '').trim()).filter(Boolean) : [],
+        highlight: !!s.highlight,
+      })).filter((s) => s.title);
+
+      await db.collection('app_settings').doc('terms_of_use').set(
+        {
+          sections: sanitized,
+          updatedAt: FieldValue.serverTimestamp(),
+          updatedBy: admin.uid,
+        },
+      );
+
+      return Response.json({ ok: true, sectionsCount: sanitized.length }, { status: 200 });
     }
 
     return Response.json({ error: 'Invalid settings type' }, { status: 400 });

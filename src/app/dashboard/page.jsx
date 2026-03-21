@@ -76,7 +76,11 @@ export default function DashboardPage() {
           return bMs - aMs;
         });
 
-        setLicenses(data.licenses || []);
+        setLicenses((data.licenses || []).sort((a, b) => {
+          const aMs = a.issuedAt?.seconds ? a.issuedAt.seconds * 1000 : Date.parse(a.issuedAt || 0) || 0;
+          const bMs = b.issuedAt?.seconds ? b.issuedAt.seconds * 1000 : Date.parse(b.issuedAt || 0) || 0;
+          return bMs - aMs;
+        }));
         setPayments(paymentRows);
         setTrades(tradeRows);
         setProfile(data.profile || { fullName: '', phone: '', passport: '', address: '' });

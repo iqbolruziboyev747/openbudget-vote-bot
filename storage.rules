@@ -1,0 +1,15 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Videos: authenticated users can write, anyone can read
+    match /videos/{allPaths=**} {
+      allow read;
+      allow write: if request.auth != null;
+    }
+    // Robots: authenticated users can write, authenticated can read
+    match /robots/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}

@@ -5,28 +5,8 @@ import Link from 'next/link';
 import SiteHeader from '../../components/SiteHeader';
 import SiteFooter from '../../components/SiteFooter';
 
-export default function TermsPage() {
-  const [profile, setProfile] = useState(null);
-
-  useEffect(() => {
-    fetch('/api/public/site-profile')
-      .then((r) => r.json())
-      .then((d) => setProfile(d.profile || {}))
-      .catch(() => {});
-  }, []);
-
-  const seller = profile?.seller || {};
-  const phone = profile?.phone || '+998930012284';
-  const telegram = profile?.telegramChannel || 'https://t.me/Fath_EA';
-  const author = profile?.authorTelegram || 'https://t.me/TraderMQL';
-
-  const sellerName = seller.ownerFullName || "Ro'ziboyev Iqboljon Talibovich";
-  const sellerBrand = seller.brand || 'FATH ROBOT';
-  const sellerForm = seller.legalForm || 'YaTT';
-  const sellerInn = seller.inn || '';
-  const sellerAddress = seller.legalAddress || '';
-
-  const sections = [
+function getDefaultSections(sellerBrand, sellerForm, sellerName) {
+  return [
     {
       title: '1. Umumiy qoidalar',
       content: `Ushbu foydalanish shartlari (keyingi o'rinlarda «Shartlar») ${sellerBrand} dasturiy ta'minotidan
@@ -126,6 +106,46 @@ export default function TermsPage() {
         O'zbekiston Respublikasi sudlari orqali hal etiladi.`,
     },
   ];
+}
+
+export default function TermsPage() {
+  const [profile, setProfile] = useState(null);
+  const [customSections, setCustomSections] = useState(null);
+  const [termsUpdatedAt, setTermsUpdatedAt] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/public/site-profile')
+      .then((r) => r.json())
+      .then((d) => setProfile(d.profile || {}))
+      .catch(() => {});
+
+    fetch('/api/public/terms')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.sections && d.sections.length > 0) {
+          setCustomSections(d.sections);
+          setTermsUpdatedAt(d.updatedAt);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const seller = profile?.seller || {};
+  const phone = profile?.phone || '+998930012284';
+  const telegram = profile?.telegramChannel || 'https://t.me/Fath_EA';
+  const author = profile?.authorTelegram || 'https://t.me/TraderMQL';
+
+  const sellerName = seller.ownerFullName || "Ro'ziboyev Iqboljon Talibovich";
+  const sellerBrand = seller.brand || 'FATH ROBOT';
+  const sellerForm = seller.legalForm || 'YaTT';
+  const sellerInn = seller.inn || '';
+  const sellerAddress = seller.legalAddress || '';
+
+  const sections = customSections || getDefaultSections(sellerBrand, sellerForm, sellerName);
+
+  const updatedDate = termsUpdatedAt
+    ? new Date(termsUpdatedAt).toLocaleDateString('uz-UZ', { year: 'numeric', month: '2-digit', day: '2-digit' })
+    : '2026-03-21';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -139,7 +159,7 @@ export default function TermsPage() {
           <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-50 sm:text-4xl">
             Foydalanish shartlari
           </h1>
-          <p className="mt-3 text-slate-400">Oxirgi yangilanish: 2026-03-21</p>
+          <p className="mt-3 text-slate-400">Oxirgi yangilanish: {updatedDate}</p>
         </div>
 
         {/* Sotuvchi ma'lumotlari */}
