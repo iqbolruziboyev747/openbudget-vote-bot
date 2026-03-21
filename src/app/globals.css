@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary:  #F7FAFF;
+  --bg-surface:  #FFFFFF;
+  --bg-card:     #FFFFFF;
+  --border:      #D6E4F2;
+  --border-mid:  #BDD3EA;
+  --text-primary: #0F172A;
+  --text-muted:   #475569;
+  --gold:         #C49A30;
+  --gold-light:   #E0B84A;
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
+  --font-sans: var(--font-body), "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --font-mono: "Consolas", "Courier New", monospace;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(56, 189, 248, 0.12), transparent 32%),
+    radial-gradient(circle at 95% 15%, rgba(14, 165, 233, 0.08), transparent 28%),
+    var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body), "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+}
+
+.fath-shell {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 22px rgba(2, 8, 23, 0.07);
+}
+
+.fath-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fath-badge--paid {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.fath-badge--pending {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0c4a6e;
+  border: 1px solid rgba(14, 165, 233, 0.28);
+}
+
+.fath-badge--inactive,
+.fath-badge--expired,
+.fath-badge--cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #B91C1C;
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+/* Global palette harmonization for existing utility-heavy pages */
+.bg-slate-950 { background-color: #f6f9fd; }
+.bg-slate-900 { background-color: #ffffff; }
+.bg-slate-900\/50 { background-color: #eef4fb; }
+.bg-slate-900\/30 { background-color: #f3f7fc; }
+.bg-slate-800 { background-color: #eef4fb; }
+
+.border-slate-800 { border-color: #d8e5f2; }
+.border-slate-700 { border-color: #c9d9ea; }
+
+.text-slate-100 { color: #0f172a; }
+.text-slate-200 { color: #1e293b; }
+.text-slate-300 { color: #334155; }
+.text-slate-400 { color: #475569; }
+.text-slate-500 { color: #64748b; }
+.text-slate-600 { color: #64748b; }
+
+.text-amber-400 { color: #0369a1; }
+.text-amber-500 { color: #0369a1; }
+.bg-amber-500\/10 { background-color: #e0f2fe; }
+.border-amber-500\/30 { border-color: #7dd3fc; }
+.bg-amber-600 { background-color: #0284c7; }
+.hover\:bg-amber-700:hover { background-color: #0369a1; }
+
+.fath-grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(2, 132, 199, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(2, 132, 199, 0.08) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.fath-hero-glow {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(8, 145, 178, 0.23), transparent 42%),
+    radial-gradient(circle at 85% 20%, rgba(2, 132, 199, 0.18), transparent 45%),
+    linear-gradient(180deg, #ffffff 0%, #f6fbff 100%);
+}
+
+.fath-fade-up {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fathFadeUp 680ms ease forwards;
+}
+
+.fath-delay-1 { animation-delay: 100ms; }
+.fath-delay-2 { animation-delay: 220ms; }
+.fath-delay-3 { animation-delay: 320ms; }
+
+@keyframes fathFadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

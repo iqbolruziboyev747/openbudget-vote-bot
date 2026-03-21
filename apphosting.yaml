@@ -1,0 +1,71 @@
+# Settings for Backend (on Cloud Run).
+# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
+runConfig:
+  minInstances: 0
+
+# Environment variables
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyAkoPBX4pwpfbxzNRaizR09q1KcbNHeH9U
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: fathrobot-5c48d.firebaseapp.com
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: fathrobot-5c48d
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: fathrobot-5c48d.firebasestorage.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: FIREBASE_STORAGE_BUCKET
+    value: fathrobot-5c48d-robot-files
+    availability:
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: '932490484932'
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: 1:932490484932:web:764f4547991a4b1478bd91
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_BASE_URL
+    value: https://fathrobot-5c48d.web.app
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: PAYME_MERCHANT_ID
+    value: 6925f7b6012d1919393045db
+    availability:
+      - RUNTIME
+  - variable: PAYME_PROJECT_CODE
+    value: fathrobot
+    availability:
+      - RUNTIME
+  - variable: PAYME_SECRET_KEY
+    secret: PAYME_SECRET_KEY
+    availability:
+      - RUNTIME
+  - variable: PAYMENT_CONFIRM_SECRET
+    secret: PAYMENT_CONFIRM_SECRET
+    availability:
+      - RUNTIME
+  - variable: FATH_NODE_PROJECT_ID
+    value: fath-node
+    availability:
+      - RUNTIME
+  - variable: FATH_NODE_SERVICE_ACCOUNT_JSON
+    secret: FATH_NODE_SERVICE_ACCOUNT_JSON
+    availability:
+      - RUNTIME
+
