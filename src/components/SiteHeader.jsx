@@ -10,7 +10,7 @@ import useAuthUser from '../lib/useAuthUser';
 
 const links = [
   { href: '/about',      label: 'Robot haqida' },
-  { href: '/guide-mt5',  label: "MT5 O'rnatish" },
+  { href: '/guide-mt5',  label: "Robotni o'rnatish" },
   { href: '/robot-status', label: 'Robot holati' },
   { href: '/statistics', label: 'Statistika' },
   { href: '/versions',   label: 'Versiyalar' },

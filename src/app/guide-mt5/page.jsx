@@ -15,10 +15,8 @@ function toEmbedUrl(url) {
       const id = parsed.pathname.replace('/', '');
       return id ? `https://www.youtube.com/embed/${id}` : '';
     }
-
     const v = parsed.searchParams.get('v');
     if (v) return `https://www.youtube.com/embed/${v}`;
-
     if (parsed.pathname.includes('/embed/')) return url;
     return '';
   } catch {
@@ -26,98 +24,356 @@ function toEmbedUrl(url) {
   }
 }
 
-const steps = [
+const allSteps = [
   {
-    num: 1,
+    id: 1,
+    title: 'Litsenziya sotib olish',
+    icon: '🛒',
+    summary: "Tariflar sahifasidan o'zingizga mos tarifni tanlang va to'lovni amalga oshiring.",
+    details: [
+      {
+        heading: "Tarif tanlash",
+        text: "Saytdagi Tariflar sahifasiga o'ting. 1 oy, 3 oy, 6 oy yoki 12 oylik tariflardan birini tanlang. Uzoqroq muddat — arzonroq narx.",
+      },
+      {
+        heading: "MT5 hisob raqamini kiriting",
+        text: "To'lov sahifasida MetaTrader 5 dagi real hisob raqamingizni kiriting. Litsenziya shu hisobga biriktiriladi. Raqamni noto'g'ri kiritib bo'lmaydi — diqqat bilan tekshiring!",
+        warning: "Hisob raqami noto'g'ri kiritilsa, litsenziya ishlamaydi. Brokeringiz bergan MT5 hisob raqamini aynan shu yerga yozing.",
+      },
+      {
+        heading: "To'lov qilish",
+        text: "Payme orqali qulay usulda to'lang. To'lov tasdiqlangach, litsenziya 1-3 ish kuni ichida faollashtiriladi.",
+      },
+      {
+        heading: "Litsenziya kalitini olish",
+        text: "Litsenziya faollashtirilgach, shaxsiy kabinet (Dashboard) da litsenziya kaliti paydo bo'ladi. Bu kalitni robot sozlamalariga kiritasiz.",
+      },
+    ],
+    link: { href: '/shop', label: "Tariflarni ko'rish →" },
+  },
+  {
+    id: 2,
     title: "MetaTrader 5 o'rnatish",
-    body: "MT5 ni rasmiy saytidan (metatrader5.com) yuklab oling va o'rnating. Windows, Mac yoki Linux uchun kerakli versiyani tanlang.",
+    icon: '💻',
+    summary: "Agar kompyuteringizda MT5 o'rnatilmagan bo'lsa, brokeringiz yoki rasmiy saytdan yuklab o'rnating.",
+    details: [
+      {
+        heading: "MT5 ni yuklab olish",
+        text: "Brokeringizning rasmiy saytidan MetaTrader 5 ni yuklab oling. Ko'pchilik brokerlar (Exness, RoboForex, IC Markets, OctaFX va boshqalar) o'z saytlarida MT5 yuklab olish tugmasini taqdim etadi.",
+      },
+      {
+        heading: "O'rnatish",
+        text: "Yuklab olingan faylni ishga tushiring va ko'rsatmalarga amal qiling. O'rnatish 1-2 daqiqa davom etadi. O'rnatish tugagach, MT5 avtomatik ochiladi.",
+      },
+      {
+        heading: "Hisobga kirish",
+        text: "MT5 ochilganda, brokeringiz bergan login va parolni kiriting. File → Login to Trade Account tugmasidan foydalaning. Server ro'yxatidan brokeringiz serverini tanlang.",
+        tip: "Demo hisob ochib sinash uchun — File → Open an Account → demo tanlang.",
+      },
+    ],
   },
   {
-    num: 2,
-    title: 'Broker hisobi ochish',
-    body: "Ishonchli Forex/kripto broker orqali hisob oching. FATH MetaTrader 5 qo'llab-quvvatlaydigan barcha brokerlar bilan ishlaydi. Demo yoki real hisob tanlang.",
+    id: 3,
+    title: 'Robot faylini yuklash',
+    icon: '📥',
+    summary: "Eng so'nggi FATH robot versiyasini saytdan yuklab oling.",
+    details: [
+      {
+        heading: "Versiyalar sahifasiga o'tish",
+        text: "Shaxsiy kabinetga (Dashboard) kiring. U yerda \"Versiyalar\" bo'limi mavjud yoki saytdagi Versiyalar sahifasiga o'ting.",
+      },
+      {
+        heading: "Eng so'nggi versiyani yuklash",
+        text: "Eng so'nggi FATH versiyasini (.ex5 fayl) \"Yuklash\" tugmasi orqali kompyuteringizga yuklab oling. Fayl nomi masalan: FATH_1.6.ex5",
+      },
+    ],
+    link: { href: '/versions', label: "Versiyalar sahifasi →" },
   },
   {
-    num: 3,
-    title: 'FATH robotni yuklash',
-    body: "Litsenziya sotib olgandan so'ng, FATH_1.6.ex5 faylini yuklab oling va MT5 ning MQL5\\Experts papkasiga ko'chiring.",
+    id: 4,
+    title: "Robotni MT5 ga joylash",
+    icon: '📂',
+    summary: "Yuklab olingan robot faylini MT5 ning Experts papkasiga ko'chiring.",
+    details: [
+      {
+        heading: "Experts papkasini ochish",
+        text: "MetaTrader 5 ni oching. Yuqoridagi menyudan: File → Open Data Folder bosing. Ochilgan papkada MQL5 → Experts papkasiga kiring.",
+        tip: "Yo'l odatda: C:\\Users\\[Ism]\\AppData\\Roaming\\MetaQuotes\\Terminal\\[ID]\\MQL5\\Experts",
+      },
+      {
+        heading: "Robot faylini ko'chirish",
+        text: "Yuklab olingan FATH_1.6.ex5 faylini Experts papkasiga ko'chiring yoki tortib tashlang (drag & drop).",
+      },
+      {
+        heading: "MT5 ni yangilash",
+        text: "Robot faylini joylaganingizdan so'ng, MT5 da chap tomondagi Navigator panelida sichqoncha o'ng tugmasi bilan Expert Advisors ustiga bosing va \"Refresh\" tanlang. FATH_1.6 ro'yxatda paydo bo'ladi.",
+        tip: "Agar ko'rinmasa, MT5 ni yopib qaytadan oching.",
+      },
+    ],
   },
   {
-    num: 4,
-    title: 'Terminal sozlamalari',
-    body: "MetaTrader 5 ni oching → Tools → Options → Expert Advisors bo'limiga kiring → \"Allow automated trading\" katagini belgilang.",
+    id: 5,
+    title: "AutoTrading va WebRequest sozlash",
+    icon: '⚡',
+    summary: "MT5 da avtomatik savdoni va internet ulanishini ruxsat bering — bu robotning ishlashi uchun majburiy.",
+    details: [
+      {
+        heading: "AutoTrading yoqish",
+        text: "MT5 ning yuqori toolbaridagi \"AutoTrading\" tugmasini bosing. Tugma yashil rangda bo'lishi kerak. Qizil bo'lsa — o'chirilgan, robot ishlamaydi.",
+        warning: "Bu tugma qizil bo'lsa, robot hech qanday buyruq bera olmaydi!",
+      },
+      {
+        heading: "Expert Advisors sozlamalariga kirish",
+        text: "Menyudan Tools → Options → Expert Advisors bo'limiga kiring. Bu yerda avtomatik savdo va internet ulanishi ruxsatlari bor.",
+      },
+      {
+        heading: "Kerakli belgilar",
+        checklist: [
+          "✅ Allow automated trading — avtomatik savdoga ruxsat",
+          "✅ Allow DLL imports — qo'shimcha kutubxonalarga ruxsat",
+        ],
+      },
+      {
+        heading: "⚠️ WebRequest sozlash (JUDA MUHIM!)",
+        text: "Robot serverga ulanib litsenziyani tekshiradi va savdo natijalarini yuboradi. Buning uchun WebRequest sozlanishi SHART. Aks holda robot ishga tushmaydi!",
+        warning: "WebRequest sozlanmasa, robot litsenziyani tekshira olmaydi va \"License check failed\" yoki \"WebRequest error\" xabarini beradi. Bu qadamni albatta bajaring!",
+      },
+      {
+        heading: "WebRequest ni sozlash bosqichlari",
+        text: "1) Tools → Options → Expert Advisors bo'limiga kiring.\n2) \"Allow WebRequest for listed URL\" katagini belgilang (✅ qo'ying).\n3) Pastdagi maydonga quyidagi URL ni qo'shing:",
+      },
+      {
+        heading: "Qo'shilishi kerak bo'lgan URL",
+        text: "Robot sozlamalaridagi SiteApiBaseUrl maydonida ko'rsatilgan URL ni aynan shu holatda ko'chiring. URL odatda robot Inputs oynasida ko'rinadi. Masalan: https://fathrobot-5c48d.web.app",
+        tip: "Agar SiteApiFallbackUrl ham bo'lsa (zaxira URL), uni ham alohida qator sifatida qo'shing. Har bir URL alohida qatorda bo'lishi kerak.",
+      },
+      {
+        heading: "URL qo'shish usuli",
+        checklist: [
+          "1. Tools → Options → Expert Advisors oching",
+          "2. \"Allow WebRequest for listed URL\" belgisini qo'ying",
+          "3. URL ro'yxatida bo'sh joyga ikki marta bosing",
+          "4. SiteApiBaseUrl dagi URL ni joylang (masalan: https://fathrobot-5c48d.web.app)",
+          "5. Yana bo'sh joyga bosib, SiteApiFallbackUrl ni ham qo'shing (agar bor bo'lsa)",
+          "6. OK tugmasini bosing",
+        ],
+      },
+      {
+        heading: "Tekshirish",
+        text: "WebRequest to'g'ri sozlanganini tekshirish uchun robotni grafik ustiga qo'ying va Experts logida \"License valid\" xabarini kuting. Agar \"WebRequest error\" chiqsa — URL to'g'ri kiritilganini qayta tekshiring.",
+        warning: "URL boshida va oxirida bo'sh joy (probel) bo'lmasligi kerak. URL aniq bir xil bo'lishi shart — bitta harf farq qilsa ham ishlamaydi.",
+      },
+    ],
   },
   {
-    num: 5,
-    title: 'FATH ni sozlash',
-    body: "Grafik oynasini oching va FATH robotini ustiga tashlang. Sozlamalar oynasida xavf darajasi, valyuta juftliklari va strategiyani tanlang.",
+    id: 6,
+    title: "Robotni grafik ustiga qo'yish",
+    icon: '📊',
+    summary: "Valyuta juftligini ochib, FATH robotini grafik ustiga tashlang.",
+    details: [
+      {
+        heading: "Grafik ochish",
+        text: "MT5 da savdo qilinadigan valyuta juftligini yoki instrumentni oching. Masalan, XAUUSD (oltin). Chap tomondagi Market Watch dan ikki marta bosing yoki chartga sudrab tashlang.",
+        tip: "Robot XAUUSD (oltin), valyuta juftliklari va boshqa instrumentlarda ishlaydi. Asosiy instrument: XAUUSD.",
+      },
+      {
+        heading: "Robotni grafik ustiga qo'yish",
+        text: "Navigator panelidan (Ctrl+N) Expert Advisors → FATH_1.6 ni toping. Uni ochiq grafik ustiga ikki marta bosing yoki tortib tashlang. Sozlamalar oynasi ochiladi.",
+      },
+    ],
   },
   {
-    num: 6,
-    title: 'Backtesting',
-    body: "Robotni real savdoga qo'shishdan avval Strategy Tester (Ctrl+R) orqali tarixiy ma'lumotlarda sinab ko'ring.",
+    id: 7,
+    title: "Litsenziya va sozlamalar",
+    icon: '🔑',
+    summary: "Robot sozlamalarida litsenziya kaliti va boshqa parametrlarni kiriting.",
+    details: [
+      {
+        heading: "Inputs oynasi",
+        text: "Robotni grafik ustiga qo'yganingizda Inputs (Kiritish) oynasi ochiladi. Agar yopilgan bo'lsa — chartdagi robotga sichqoncha o'ng tugma → Properties → Inputs.",
+      },
+      {
+        heading: "SiteLicenseKey (Litsenziya kaliti)",
+        text: "Dashboard dagi litsenziya kalitingizni nusxalab, SiteLicenseKey maydoniga joylang. Bu kalit sizning litsenziyangizni tekshirish uchun ishlatiladi.",
+        warning: "Kalitni noto'g'ri kiritib litsenziya ishlamasa, Dashboard dan tekshirib qayta kiriting.",
+      },
+      {
+        heading: "Boshqa sozlamalar",
+        text: "Risk darajasi (RiskPercent), lot hajmi va boshqa parametrlarni o'zingizning savdo strategiyangizga moslab sozlang. Boshlang'ichlar uchun standart sozlamalarni o'zgartirmaslik tavsiya etiladi.",
+        tip: "Dastlab standart sozlamalar bilan ishlang. Tajriba ortgach, parametrlarni o'zgartiring.",
+      },
+    ],
+    link: { href: '/dashboard', label: "Dashboard ga o'tish →" },
   },
   {
-    num: 7,
-    title: 'Real savdoni boshlash',
-    body: "Kichik hisob bilan 1-2 hafta test o'tkazing, keyin to'liq tezlikda ishga tushiring. Har kuni natijalarni kuzating.",
+    id: 8,
+    title: "Ishga tushirish va tekshirish",
+    icon: '🚀',
+    summary: "Robot ishlayotganini tekshiring va loglarni kuzating.",
+    details: [
+      {
+        heading: "Robot statusini tekshirish",
+        text: "Grafik o'ng yuqori burchagida robotning nomi va kulgimsirab turgan yuz (😊) ko'rinishi kerak. Agar xomushr (😐) yoki qizil yuz ko'rinsa — sozlamalarni tekshiring.",
+      },
+      {
+        heading: "Journal loglarini ko'rish",
+        text: "MT5 ning pastki qismidagi \"Experts\" tabini bosing. Bu yerda robot yuborgan xabarlar ko'rinadi. \"License valid\", \"FATH initialized\" kabi muvaffaqiyat xabarlari bo'lishi kerak.",
+        warning: "\"License invalid\" yoki \"License expired\" xabari chiqsa, litsenziya kaliti yoki hisob raqamini tekshiring.",
+      },
+      {
+        heading: "Birinchi savdo",
+        text: "Robot bozor sharoitiga qarab o'zi savdo ochadi. Sabr bilan kuting — robot signalni kutmoqda. Trade tabida ochilgan pozitsiyalarni kuzatishingiz mumkin.",
+      },
+    ],
   },
 ];
 
-const faqs = [
+const tips = [
   {
-    q: "FATH qaysi brokerlar bilan ishlaydi?",
-    a: "MetaTrader 5 qo'llab-quvvatlaydigan barcha brokerlar: Exness, OctaFX, RoboForex, IC Markets va boshqalar. Eng yaxshi natija uchun past spread va tez bajaruvchi broker tanlang.",
+    icon: '🖥️',
+    title: "VPS server tavsiya etiladi",
+    text: "Robot 24/7 ishlashi uchun kompyuter doimo yoqiq turishi kerak. VPS server (oyiga $3-10) eng qulay yechim — internet uzilishi va elektr uzilishidan himoyalaydi.",
   },
   {
-    q: "Demo hisob bilan sinash mumkinmi?",
-    a: "Ha, albatta. Live savdoga o'tishdan avval kamida 1-2 hafta demo hisob bilan test qilishni tavsiya etamiz.",
+    icon: '📊',
+    title: "Avval demo hisobda sinang",
+    text: "Real pulni xavf ostiga qo'yishdan oldin, kamida 1-2 hafta demo hisobda sinab ko'ring. Demo hisobda haqiqiy bozor sharoitlarida robotning ishlashini kuzating.",
   },
   {
-    q: "Kompyuter 24/7 yoqiq turishi kerakmi?",
-    a: "Ha. 24/7 savdo uchun kompyuter yoki VPS server yoqiq turishi zarur. Oyiga $3-10 narxdagi VPS xizmati qulay yechim.",
-  },
-  {
-    q: "Boshlang'ich depozit qancha bo'lishi kerak?",
-    a: "Minimal $100 bilan boshlash mumkin, ammo $500-1000 optimal hisoblanadi. Katta hisob — yaxshiroq risk boshqaruvi va ko'proq foyda imkoniyati.",
-  },
-];
-
-const errors = [
-  {
-    title: '"Expert Advisor disabled"',
-    fix: 'Tools → Options → Expert Advisors → "Allow automated trading" ni belgilang. Keyin F5 tugmasini bosing.',
-  },
-  {
-    title: "FATH fayli topilmayapti",
-    fix: "FATH_1.6.ex5 faylini ...\\MetaQuotes\\Terminal\\...\\MQL5\\Experts papkasiga ko'chiring va MT5 ni qayta ishga tushiring.",
-  },
-  {
-    title: "Savdo ochmayapti",
-    fix: "Broker ulanishini va hisob statusini tekshiring. Strategy Tester bilan sinab ko'ring. Xavf darajasini oshiring.",
+    icon: '💰',
+    title: "Risk boshqarish",
+    text: "Faqat yo'qotishga tayyor bo'lgan mablag' bilan savdo qiling. Boshlang'ich depozit kamida $100, optimal $500-1000.",
   },
 ];
 
-export default function MT5GuidePage() {
+const troubleshooting = [
+  {
+    problem: "\"Expert Advisor disabled\" xabari chiqyapti",
+    solution: "AutoTrading tugmasi o'chirilgan. Yuqori toolbardagi AutoTrading tugmasini bosing (yashil bo'lishi kerak). Keyin Tools → Options → Expert Advisors → Allow automated trading belgilang.",
+  },
+  {
+    problem: "Robot Navigator da ko'rinmayapti",
+    solution: "FATH_1.6.ex5 faylini to'g'ri papkaga (MQL5/Experts) ko'chirganingizni tekshiring. Navigator da Expert Advisors ustiga o'ng tugma → Refresh bosing. Yoki MT5 ni qayta ishga tushiring.",
+  },
+  {
+    problem: "\"License invalid\" xabari",
+    solution: "1) Litsenziya kalitini Dashboard dan nusxalab, robot inputlariga qayta joylang. 2) MT5 hisob raqamingiz litsenziya bilan bir xil ekanini tekshiring. 3) Litsenziya muddati tugagan bo'lishi mumkin.",
+  },
+  {
+    problem: "\"WebRequest error\" yoki \"License check failed\"",
+    solution: "WebRequest sozlanmagan. Tools → Options → Expert Advisors → \"Allow WebRequest for listed URL\" belgilang va SiteApiBaseUrl dagi URL ni ro'yxatga qo'shing. URL to'g'ri yozilganini tekshiring — boshida/oxirida probel bo'lmasin.",
+  },
+  {
+    problem: "Robot savdo ochmayapti",
+    solution: "Robot signalni kutmoqda — bu normal holat. Bozor sharoiti mos kelganida savdo ochiladi. Agar uzoq vaqt ochilmasa: 1) Internet ulanishini tekshiring, 2) Brokerda savdo vaqtini tekshiring, 3) Experts loglarini o'qing.",
+  },
+  {
+    problem: "Chart da robot yuz ko'rsatmayapti",
+    solution: "Robotni qayta grafik ustiga qo'ying: Navigator → FATH_1.6 ni grafik ustiga ikki marta bosing. Properties → Common tabida \"Allow Algo Trading\" belgilang.",
+  },
+];
+
+function StepCard({ step, isOpen, onToggle }) {
+  return (
+    <div className={`rounded-2xl border transition-all duration-300 ${isOpen ? 'border-amber-400 bg-white shadow-lg shadow-amber-100/50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center gap-4 p-5 text-left"
+      >
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl transition-colors ${isOpen ? 'bg-amber-100' : 'bg-slate-100'}`}>
+          {step.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold uppercase tracking-wider ${isOpen ? 'text-amber-600' : 'text-slate-400'}`}>
+              Qadam {step.id}
+            </span>
+          </div>
+          <h3 className="mt-0.5 text-lg font-bold text-slate-900">{step.title}</h3>
+          <p className="mt-1 text-sm text-slate-500 line-clamp-1">{step.summary}</p>
+        </div>
+        <svg className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="border-t border-slate-100 px-5 pb-5 pt-4">
+          <p className="mb-4 text-sm leading-relaxed text-slate-600">{step.summary}</p>
+
+          <div className="space-y-4">
+            {step.details.map((d, i) => (
+              <div key={i} className="rounded-xl bg-slate-50 p-4">
+                <h4 className="font-semibold text-slate-800">{d.heading}</h4>
+                {d.text && <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{d.text}</p>}
+
+                {d.checklist && (
+                  <ul className="mt-2 space-y-1.5">
+                    {d.checklist.map((item, j) => (
+                      <li key={j} className="text-sm text-slate-700">{item}</li>
+                    ))}
+                  </ul>
+                )}
+
+                {d.warning && (
+                  <div className="mt-2 flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <span className="shrink-0 text-amber-500">⚠️</span>
+                    <p className="text-xs leading-relaxed text-amber-800">{d.warning}</p>
+                  </div>
+                )}
+
+                {d.tip && (
+                  <div className="mt-2 flex gap-2 rounded-lg border border-cyan-200 bg-cyan-50 p-3">
+                    <span className="shrink-0 text-cyan-500">💡</span>
+                    <p className="text-xs leading-relaxed text-cyan-800">{d.tip}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {step.link && (
+            <div className="mt-4">
+              <Link href={step.link.href} className="inline-flex items-center gap-1 text-sm font-semibold text-amber-700 hover:text-amber-800">
+                {step.link.label}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function GuidePage() {
   const [guideVideoUrl, setGuideVideoUrl] = useState(DEFAULT_GUIDE_VIDEO);
+  const [openStep, setOpenStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState([]);
 
   useEffect(() => {
-    const loadGuideVideo = async () => {
-      try {
-        const res = await fetch('/api/public/site-profile');
-        const data = await res.json();
-        if (!res.ok) return;
-        const raw = data?.profile?.guideVideoUrl;
-        if (raw) setGuideVideoUrl(raw);
-      } catch {
-        // Keep default guide when profile endpoint is unavailable.
-      }
-    };
-
-    loadGuideVideo();
+    fetch('/api/public/site-profile')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.profile?.guideVideoUrl) setGuideVideoUrl(data.profile.guideVideoUrl);
+      })
+      .catch(() => {});
   }, []);
 
+  const toggleStep = (id) => {
+    setOpenStep(openStep === id ? null : id);
+  };
+
+  const markComplete = (id) => {
+    if (!completedSteps.includes(id)) {
+      setCompletedSteps((prev) => [...prev, id]);
+    }
+    if (id < allSteps.length) {
+      setOpenStep(id + 1);
+    }
+  };
+
   const embedUrl = toEmbedUrl(guideVideoUrl);
+  const progress = Math.round((completedSteps.length / allSteps.length) * 100);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -131,85 +387,138 @@ export default function MT5GuidePage() {
             Bosqichma-bosqich yo'riqnoma
           </span>
           <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
-            MetaTrader 5 o'rnatish qo'llanmasi
+            Robotni o'rnatish
           </h1>
-          <p className="mt-3 text-slate-600">
-            FATH robotini 30 daqiqada o'rnatib, savdoni boshlash uchun to'liq yo'riqnoma
+          <p className="mt-3 text-slate-600 max-w-2xl">
+            Litsenziya sotib olishdan boshlab, robotni ishga tushirishgacha — hamma narsa qadamba-qadam. 
+            Birinchi marta foydalanayotgan bo'lsangiz ham osongina o'rnatasiz.
           </p>
         </div>
 
-        <section className="mb-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-bold text-slate-900">Video qo'llanma</h2>
-          <p className="mb-4 text-sm text-slate-600">Agar yozma bosqichlar qiyin tuyulsa, quyidagi videodan bosqichma-bosqich ko'ring.</p>
+        {/* Progress Bar */}
+        <div className="mb-8 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-slate-700">Jarayon</span>
+            <span className="text-sm font-bold text-amber-600">{completedSteps.length}/{allSteps.length} qadam</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {completedSteps.length === allSteps.length && (
+            <p className="mt-2 text-center text-sm font-semibold text-emerald-600">🎉 Barcha qadamlar bajarildi! Robot ishlashga tayyor.</p>
+          )}
+        </div>
+
+        {/* Video */}
+        <section className="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-2 text-lg font-bold text-slate-900">🎬 Video qo'llanma</h2>
+          <p className="mb-4 text-sm text-slate-600">Yozma bosqichlar qiyin tuyulsa, avval videoni ko'ring — keyin qadamlarni bajaring.</p>
           <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
             {embedUrl ? (
               <iframe
                 className="h-56 w-full sm:h-80"
                 src={embedUrl}
-                title="MT5 o'rnatish video qo'llanma"
+                title="FATH robot o'rnatish video qo'llanma"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
             ) : (
-              <div className="flex h-40 items-center justify-center px-4 text-center text-sm text-slate-600">
-                Video havola topilmadi. Admin paneldan YouTube havolani kiriting.
+              <div className="flex h-40 items-center justify-center px-4 text-center text-sm text-slate-500">
+                Video hali qo'shilmagan. Admin paneldan YouTube havolani kiriting.
               </div>
             )}
           </div>
         </section>
 
-        <section className="mb-10 rounded-xl border border-emerald-200 bg-emerald-50 p-6">
-          <h2 className="mb-3 text-lg font-bold text-emerald-800">Tez start cheklist</h2>
-          <ul className="space-y-2 text-sm text-emerald-900">
-            <li>1. MT5 o'rnatildi va akkauntga kirildi</li>
-            <li>2. FATH_1.6.ex5 MQL5/Experts papkasiga joylandi</li>
-            <li>3. AutoTrading yoqildi</li>
-            <li>4. Litsenziya kaliti va MT5 hisob raqami to'g'ri kiritildi</li>
-            <li>5. Demo testdan keyin real savdo boshlandi</li>
-          </ul>
-        </section>
-
-        <section className="mb-10 rounded-xl border border-cyan-200 bg-cyan-50/60 p-6">
-          <h2 className="text-lg font-bold text-cyan-900">Professional o'rnatish xizmati</h2>
-          <p className="mt-2 text-sm text-cyan-900/80">
-            Agar xohlasangiz, mutaxassis yordamida to'liq o'rnatish xizmatini tanlashingiz mumkin.
-            Narxi: <span className="font-semibold">150 000 UZS</span>.
-          </p>
-          <ul className="mt-3 space-y-1.5 text-sm text-cyan-900/80">
-            <li>- Robot, terminal va asosiy parametrlar masofadan sozlanadi</li>
-            <li>- Qulay vaqt bo'yicha bog'lanish tashkil qilinadi</li>
-            <li>- Telefon va Telegram kontaktlaringiz orqali tezkor aloqaga chiqiladi</li>
-          </ul>
-          <div className="mt-4">
-            <Link href="/shop" className="inline-block rounded-lg bg-cyan-700 px-5 py-2 text-sm font-semibold text-white hover:bg-cyan-800">
-              Xaridda xizmatni tanlash
-            </Link>
-          </div>
-        </section>
-
         {/* Steps */}
-        <section className="mb-12">
+        <section className="mb-10">
           <div className="space-y-3">
-            {steps.map((s) => (
-              <div key={s.num} className="flex gap-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-amber-600 text-sm font-black text-white">
-                  {s.num}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-900 mb-1">{s.title}</h3>
-                  <p className="text-sm leading-6 text-slate-600">{s.body}</p>
-                </div>
+            {allSteps.map((step) => (
+              <div key={step.id}>
+                <StepCard
+                  step={step}
+                  isOpen={openStep === step.id}
+                  onToggle={() => toggleStep(step.id)}
+                />
+                {openStep === step.id && (
+                  <div className="flex justify-end px-2 pt-2">
+                    <button
+                      onClick={() => markComplete(step.id)}
+                      disabled={completedSteps.includes(step.id)}
+                      className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                        completedSteps.includes(step.id)
+                          ? 'bg-emerald-100 text-emerald-700 cursor-default'
+                          : 'bg-amber-600 text-white hover:bg-amber-700'
+                      }`}
+                    >
+                      {completedSteps.includes(step.id) ? '✓ Bajarildi' : 'Bajarildi — keyingisiga o\'tish'}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </section>
 
+        {/* Pro Tips */}
+        <section className="mb-10">
+          <h2 className="mb-4 text-lg font-bold text-slate-900">💡 Muhim maslahatlar</h2>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {tips.map((t) => (
+              <div key={t.title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <span className="text-2xl">{t.icon}</span>
+                <h3 className="mt-2 font-semibold text-slate-900 text-sm">{t.title}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{t.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Professional Installation */}
+        <section className="mb-10 rounded-xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-white p-6">
+          <h2 className="text-lg font-bold text-cyan-900">🛠 Professional o'rnatish xizmati</h2>
+          <p className="mt-2 text-sm text-cyan-900/80">
+            O'zingiz o'rnatishga vaqtingiz yo'qmi yoki qiyinchilik bo'lsa — mutaxassis masofaviy ravishda o'rnatib beradi.
+          </p>
+          <ul className="mt-3 space-y-1.5 text-sm text-cyan-900/80">
+            <li>✓ Robot, terminal va parametrlar to'liq sozlanadi</li>
+            <li>✓ Qulay vaqtda Telegram/telefon orqali bog'laniladi</li>
+            <li>✓ O'rnatish 30-60 daqiqa davom etadi</li>
+          </ul>
+          <div className="mt-4">
+            <Link href="/shop" className="inline-block rounded-lg bg-cyan-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-cyan-800 transition-colors">
+              Xaridda xizmatni tanlash →
+            </Link>
+          </div>
+        </section>
+
+        {/* Troubleshooting */}
+        <section className="mb-10">
+          <h2 className="mb-4 text-lg font-bold text-slate-900">🔧 Muammolar va yechimlar</h2>
+          <div className="space-y-3">
+            {troubleshooting.map((t) => (
+              <details key={t.problem} className="rounded-xl border border-slate-200 bg-white shadow-sm group cursor-pointer">
+                <summary className="flex items-center gap-3 p-4 font-medium text-slate-700 group-open:text-red-700 transition-colors select-none">
+                  <span className="shrink-0 text-red-400 group-open:text-red-600">⚠</span>
+                  {t.problem}
+                </summary>
+                <div className="border-t border-slate-100 px-4 pb-4 pt-3">
+                  <p className="text-sm leading-relaxed text-slate-600">{t.solution}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
         {/* System Requirements */}
-        <section className="mb-10 rounded-lg border border-slate-200 bg-white p-7 shadow-sm">
-          <h2 className="mb-5 text-lg font-bold text-slate-900">Tizim talablari</h2>
+        <section className="mb-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-5 text-lg font-bold text-slate-900">💻 Tizim talablari</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
+            <div className="rounded-lg bg-slate-50 p-4">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-600">Kompyuter</p>
               <ul className="space-y-1.5 text-sm text-slate-600">
                 <li>— Windows 7 yoki undan yuqori</li>
@@ -218,55 +527,32 @@ export default function MT5GuidePage() {
                 <li>— Internet ulanishi (10 Mbps+)</li>
               </ul>
             </div>
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-600">VPS server</p>
+            <div className="rounded-lg bg-slate-50 p-4">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-600">VPS server (tavsiya)</p>
               <ul className="space-y-1.5 text-sm text-slate-600">
                 <li>— Linux yoki Windows VPS</li>
                 <li>— Kamida 1 GB RAM</li>
                 <li>— 99.9% uptime kafolati</li>
-                <li>— 24/7 ulanish</li>
+                <li>— 24/7 uzluksiz ishlash</li>
               </ul>
             </div>
           </div>
         </section>
 
-        {/* FAQ */}
-        <section className="mb-10">
-          <h2 className="mb-5 text-lg font-bold text-slate-900">Ko'p so'raladigan savollar</h2>
-          <div className="space-y-3">
-            {faqs.map((f) => (
-              <details key={f.q} className="rounded-lg border border-slate-200 bg-white p-5 group cursor-pointer shadow-sm">
-                <summary className="font-medium text-slate-700 group-open:text-amber-700 transition-colors select-none">
-                  {f.q}
-                </summary>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{f.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-
-        {/* Troubleshooting */}
-        <section className="mb-10">
-          <h2 className="mb-5 text-lg font-bold text-slate-900">Muammolarni hal qilish</h2>
-          <div className="space-y-3">
-            {errors.map((e) => (
-              <div key={e.title} className="rounded-lg border border-red-200 bg-red-50 p-5">
-                <p className="font-medium text-red-700 mb-1.5">{e.title}</p>
-                <p className="text-sm text-slate-700">{e.fix}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* CTA */}
-        <section className="rounded-lg border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h2 className="text-lg font-bold text-slate-900 mb-2">Litsenziya sotib olishga tayyormisiz?</h2>
+        <section className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Tayyormisiz?</h2>
           <p className="text-sm text-slate-600 mb-6">
-            Litsenziya olgan daqiqadan boshlab robot to'liq ishlashga tayyor
+            Litsenziya oling va robotni bugun ishga tushiring
           </p>
-          <Link href="/shop" className="inline-block rounded-md bg-amber-600 px-7 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors">
-            Litsenziya sotib olish
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/shop" className="inline-block rounded-lg bg-amber-600 px-7 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors">
+              Litsenziya sotib olish
+            </Link>
+            <Link href="/dashboard" className="inline-block rounded-lg border border-slate-300 px-7 py-2.5 text-sm font-semibold text-slate-700 hover:border-slate-400 transition-colors">
+              Kabinetga kirish
+            </Link>
+          </div>
         </section>
 
       </main>

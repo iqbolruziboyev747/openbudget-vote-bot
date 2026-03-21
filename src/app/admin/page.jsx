@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../lib/firebase';
+import { auth, storage } from '../../lib/firebase';
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import useAuthUser from '../../lib/useAuthUser';
 import SiteHeader from '../../components/SiteHeader';
 
@@ -38,6 +39,7 @@ export default function AdminPage() {
     youtubeUrl: '',
     facebookUrl: '',
     guideVideoUrl: '',
+    testVideos: [],
     sellerBrand: '',
     sellerOwnerFullName: '',
     sellerLegalForm: '',
@@ -52,6 +54,12 @@ export default function AdminPage() {
 
   const [versionForm, setVersionForm] = useState({ version: '', notes: '', file: null });
   const [adminSecret, setAdminSecret] = useState('');
+  const [newLicense, setNewLicense] = useState({ accountId: '', planId: 'm1', email: '', fullName: '' });
+  const [creatingLicense, setCreatingLicense] = useState(false);
+  const [termsOfUse, setTermsOfUse] = useState([]);
+  const [termsUpdatedAt, setTermsUpdatedAt] = useState(null);
+  const [termsSaving, setTermsSaving] = useState(false);
+  const [videoUploading, setVideoUploading] = useState(false);
 
   const getToken = async () => {
     const token = await auth.currentUser?.getIdToken();
@@ -98,6 +106,13 @@ export default function AdminPage() {
 
     if (data.siteProfile) {
       setSiteProfile((prev) => ({ ...prev, ...data.siteProfile }));
+    }
+
+    if (data.termsOfUse) {
+      setTermsOfUse(data.termsOfUse);
+    }
+    if (data.termsUpdatedAt) {
+      setTermsUpdatedAt(data.termsUpdatedAt);
     }
   };
 
@@ -300,6 +315,95 @@ export default function AdminPage() {
     setSupportRequests((prev) => prev.map((row) => (row.id === id ? { ...row, status } : row)));
   };
 
+  const createLicense = async () => {
+    if (!newLicense.accountId.trim() || !newLicense.planId) {
+      alert('MT5 hisob raqami va tarif majburiy.');
+      return;
+    }
+
+    setCreatingLicense(true);
+    try {
+      const res = await authedFetch('/api/admin/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_license',
+          accountId: newLicense.accountId.trim(),
+          planId: newLicense.planId,
+          email: newLicense.email.trim(),
+          fullName: newLicense.fullName.trim(),
+          months: { m1: 1, m3: 3, m6: 6, y1: 12 }[newLicense.planId] || 1,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Litsenziya yaratib bo lmadi');
+
+      alert(`Litsenziya yaratildi!\nKalit: ${data.licenseKey}`);
+      setNewLicense({ accountId: '', planId: 'm1', email: '', fullName: '' });
+      await loadAdminData();
+    } catch (error) {
+      alert(`Xato: ${error.message}`);
+    } finally {
+      setCreatingLicense(false);
+    }
+  };
+
+  const saveTerms = async () => {
+    setTermsSaving(true);
+    try {
+      const res = await authedFetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'terms_of_use', data: { sections: termsOfUse } }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Shartlarni saqlashda xatolik');
+      setTermsUpdatedAt(new Date().toISOString());
+      alert('Foydalanish shartlari saqlandi.');
+    } catch (error) {
+      alert(`Xato: ${error.message}`);
+    } finally {
+      setTermsSaving(false);
+    }
+  };
+
+  const addTermsSection = () => {
+    setTermsOfUse((prev) => [...prev, { title: '', content: '', items: [], highlight: false }]);
+  };
+
+  const removeTermsSection = (idx) => {
+    setTermsOfUse((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const updateTermsSection = (idx, field, value) => {
+    setTermsOfUse((prev) => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
+  };
+
+  const addTermsItem = (sectionIdx) => {
+    setTermsOfUse((prev) =>
+      prev.map((s, i) => (i === sectionIdx ? { ...s, items: [...(s.items || []), ''] } : s))
+    );
+  };
+
+  const removeTermsItem = (sectionIdx, itemIdx) => {
+    setTermsOfUse((prev) =>
+      prev.map((s, i) =>
+        i === sectionIdx ? { ...s, items: s.items.filter((_, j) => j !== itemIdx) } : s
+      )
+    );
+  };
+
+  const updateTermsItem = (sectionIdx, itemIdx, value) => {
+    setTermsOfUse((prev) =>
+      prev.map((s, i) =>
+        i === sectionIdx
+          ? { ...s, items: s.items.map((item, j) => (j === itemIdx ? value : item)) }
+          : s
+      )
+    );
+  };
+
   if (loading || checking) {
     return <div className="min-h-screen flex items-center justify-center text-slate-700">Yuklanmoqda...</div>;
   }
@@ -361,6 +465,102 @@ export default function AdminPage() {
             <input value={siteProfile.facebookUrl} onChange={(e) => setSiteProfile((p) => ({ ...p, facebookUrl: e.target.value }))} className="rounded-lg border border-cyan-200 px-3 py-2" placeholder="Facebook URL" />
             <input value={siteProfile.guideVideoUrl} onChange={(e) => setSiteProfile((p) => ({ ...p, guideVideoUrl: e.target.value }))} className="rounded-lg border border-cyan-200 px-3 py-2 sm:col-span-2" placeholder="Qo llanma video URL" />
           </div>
+
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-slate-700">Test videolari (Robot haqida sahifasi)</p>
+            </div>
+
+            <div className="mb-3 rounded-lg border border-dashed border-cyan-300 bg-cyan-50/40 p-4">
+              <p className="text-xs font-semibold text-slate-600 mb-2">Yangi video yuklash</p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="videoTitle"
+                  className="flex-1 rounded-lg border border-cyan-200 px-3 py-2 text-sm"
+                  placeholder="Video sarlavhasi"
+                />
+                <input
+                  id="videoFile"
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                  className="flex-1 rounded-lg border border-cyan-200 px-3 py-2 text-sm"
+                />
+                <button
+                  disabled={videoUploading}
+                  onClick={async () => {
+                    const titleEl = document.getElementById('videoTitle');
+                    const fileEl = document.getElementById('videoFile');
+                    const title = titleEl?.value?.trim() || '';
+                    const file = fileEl?.files?.[0];
+                    if (!file) { alert('Video faylni tanlang'); return; }
+                    if (!title) { alert('Video sarlavhasini kiriting'); return; }
+                    if (file.size > 100 * 1024 * 1024) { alert('Fayl hajmi 100 MB dan oshmasligi kerak'); return; }
+
+                    setVideoUploading(true);
+                    try {
+                      const stamp = Date.now();
+                      const ext = file.name.split('.').pop()?.toLowerCase() || 'mp4';
+                      const safeName = title.replace(/[^0-9a-zA-Z._-]/g, '_').slice(0, 60);
+                      const storagePath = `videos/${safeName}-${stamp}.${ext}`;
+                      const storageRef = ref(storage, storagePath);
+
+                      await uploadBytes(storageRef, file, {
+                        contentType: file.type || 'video/mp4',
+                        customMetadata: { title, uploadedBy: auth.currentUser?.uid || '' },
+                      });
+
+                      const downloadUrl = await getDownloadURL(storageRef);
+
+                      setSiteProfile((p) => ({
+                        ...p,
+                        testVideos: [...(p.testVideos || []), { title, url: downloadUrl, storagePath }],
+                      }));
+
+                      titleEl.value = '';
+                      fileEl.value = '';
+                      alert('Video yuklandi! "Havolalarni saqlash" tugmasini bosing.');
+                    } catch (error) {
+                      console.error('Video upload error:', error);
+                      alert(`Xato: ${error.message || 'Video yuklanmadi'}`);
+                    } finally {
+                      setVideoUploading(false);
+                    }
+                  }}
+                  className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {videoUploading ? 'Yuklanmoqda...' : 'Yuklash'}
+                </button>
+              </div>
+            </div>
+
+            {(siteProfile.testVideos || []).length > 0 && (
+              <div className="space-y-2">
+                {(siteProfile.testVideos || []).map((v, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2">
+                    <span className="text-lg">🎬</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{v.title || `Video ${i + 1}`}</p>
+                      <p className="text-xs text-slate-500 truncate">{v.storagePath || v.objectPath || v.url || '-'}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${v.title || 'Video'}" ni o'chirmoqchimisiz?`)) return;
+                        const path = v.storagePath || v.objectPath;
+                        if (path) {
+                          try {
+                            await deleteObject(ref(storage, path));
+                          } catch {}
+                        }
+                        setSiteProfile((p) => ({ ...p, testVideos: p.testVideos.filter((_, j) => j !== i) }));
+                      }}
+                      className="shrink-0 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                    >O'chirish</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60">Havolalarni saqlash</button>
         </section>
 
@@ -380,6 +580,99 @@ export default function AdminPage() {
             <input value={siteProfile.sellerTelegram} onChange={(e) => setSiteProfile((p) => ({ ...p, sellerTelegram: e.target.value }))} className="rounded-lg border border-cyan-200 px-3 py-2" placeholder="Sotuvchi Telegram" />
           </div>
           <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60">Sotuvchi ma'lumotlarini saqlash</button>
+        </section>
+
+        <section className="fath-shell rounded-3xl p-6 mt-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">Foydalanish shartlari</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Amaldagi qonunchilikga qarab shartlarni tahrirlang.
+                {termsUpdatedAt && (
+                  <span className="ml-2 text-xs text-slate-400">
+                    Oxirgi o'zgarish: {new Date(termsUpdatedAt).toLocaleDateString('uz-UZ')}
+                  </span>
+                )}
+              </p>
+            </div>
+            <button onClick={addTermsSection} className="rounded-lg border border-cyan-300 px-3 py-1.5 text-sm font-semibold text-cyan-700 hover:bg-cyan-50">+ Bo'lim qo'shish</button>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            {termsOfUse.length === 0 ? (
+              <p className="text-sm text-slate-500">Shartlar hali kiritilmagan. Yangi bo'lim qo'shing yoki saytda standart shartlar ko'rsatiladi.</p>
+            ) : (
+              termsOfUse.map((section, sIdx) => (
+                <div key={sIdx} className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 space-y-2">
+                      <input
+                        value={section.title}
+                        onChange={(e) => updateTermsSection(sIdx, 'title', e.target.value)}
+                        className="w-full rounded-lg border border-cyan-200 px-3 py-2 text-sm font-semibold"
+                        placeholder={`${sIdx + 1}. Bo'lim sarlavhasi`}
+                      />
+                      <textarea
+                        value={section.content || ''}
+                        onChange={(e) => updateTermsSection(sIdx, 'content', e.target.value)}
+                        className="w-full rounded-lg border border-cyan-200 px-3 py-2 text-sm"
+                        rows={2}
+                        placeholder="Asosiy matn (ixtiyoriy)"
+                      />
+                    </div>
+                    <button
+                      onClick={() => removeTermsSection(sIdx)}
+                      className="shrink-0 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                      title="Bo'limni o'chirish"
+                    >✕</button>
+                  </div>
+
+                  <label className="flex items-center gap-2 text-xs text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={section.highlight || false}
+                      onChange={(e) => updateTermsSection(sIdx, 'highlight', e.target.checked)}
+                      className="rounded"
+                    />
+                    Muhim ogohlantirish sifatida ajratib ko'rsatish
+                  </label>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Bandlar:</p>
+                    {(section.items || []).map((item, iIdx) => (
+                      <div key={iIdx} className="flex items-start gap-2">
+                        <span className="mt-2.5 text-xs text-slate-400 shrink-0">{iIdx + 1}.</span>
+                        <textarea
+                          value={item}
+                          onChange={(e) => updateTermsItem(sIdx, iIdx, e.target.value)}
+                          className="flex-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm"
+                          rows={2}
+                          placeholder="Band matni"
+                        />
+                        <button
+                          onClick={() => removeTermsItem(sIdx, iIdx)}
+                          className="shrink-0 mt-1 rounded bg-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-400"
+                          title="Bandni o'chirish"
+                        >✕</button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => addTermsItem(sIdx)}
+                      className="text-xs font-semibold text-cyan-600 hover:text-cyan-800"
+                    >+ Band qo'shish</button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <button
+            disabled={termsSaving}
+            onClick={saveTerms}
+            className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60"
+          >
+            {termsSaving ? 'Saqlanmoqda...' : 'Shartlarni saqlash'}
+          </button>
         </section>
 
         <section className="fath-shell rounded-3xl p-6 mt-6">
@@ -404,6 +697,37 @@ export default function AdminPage() {
               ))
             )}
           </div>
+        </section>
+
+        <section className="fath-shell rounded-3xl p-6 mt-6">
+          <h2 className="text-2xl font-black text-slate-900">Yangi litsenziya yaratish</h2>
+          <p className="mt-1 text-sm text-slate-600">To'lovsiz litsenziya yaratish (test, sovg'a yoki maxsus holatlar uchun).</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">MT5 hisob raqami *</label>
+              <input value={newLicense.accountId} onChange={(e) => setNewLicense((p) => ({ ...p, accountId: e.target.value }))} className="w-full rounded-lg border border-cyan-200 px-3 py-2" placeholder="123456789" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">Tarif *</label>
+              <select value={newLicense.planId} onChange={(e) => setNewLicense((p) => ({ ...p, planId: e.target.value }))} className="w-full rounded-lg border border-cyan-200 px-3 py-2 bg-white">
+                <option value="m1">1 oy (MONTHLY)</option>
+                <option value="m3">3 oy (QUARTER)</option>
+                <option value="m6">6 oy (HALF-YEAR)</option>
+                <option value="y1">12 oy (YEARLY)</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">Email (ixtiyoriy)</label>
+              <input value={newLicense.email} onChange={(e) => setNewLicense((p) => ({ ...p, email: e.target.value }))} className="w-full rounded-lg border border-cyan-200 px-3 py-2" placeholder="mijoz@email.com" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">F.I.Sh (ixtiyoriy)</label>
+              <input value={newLicense.fullName} onChange={(e) => setNewLicense((p) => ({ ...p, fullName: e.target.value }))} className="w-full rounded-lg border border-cyan-200 px-3 py-2" placeholder="Ism familiya" />
+            </div>
+          </div>
+          <button disabled={creatingLicense} onClick={createLicense} className="mt-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60">
+            {creatingLicense ? 'Yaratilmoqda...' : 'Litsenziya yaratish'}
+          </button>
         </section>
 
         <section className="fath-shell rounded-3xl p-6 mt-6">

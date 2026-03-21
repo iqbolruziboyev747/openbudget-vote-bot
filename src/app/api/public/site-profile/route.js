@@ -25,6 +25,7 @@ export async function GET() {
       youtubeUrl: data.youtubeUrl || '',
       facebookUrl: data.facebookUrl || '',
       guideVideoUrl: data.guideVideoUrl || '',
+      testVideos: Array.isArray(data.testVideos) ? data.testVideos : [],
       seller: {
         brand: data.sellerBrand || SELLER_LEGAL_INFO.brand,
         ownerFullName: data.sellerOwnerFullName || SELLER_LEGAL_INFO.ownerFullName,

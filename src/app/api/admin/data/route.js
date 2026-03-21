@@ -23,13 +23,14 @@ export async function GET(request) {
 
     const db = getAdminDb();
 
-    const [licenseSnap, paymentSnap, supportSnap, pricingDoc, profileDoc, versionsSnap] = await Promise.all([
+    const [licenseSnap, paymentSnap, supportSnap, pricingDoc, profileDoc, versionsSnap, termsDoc] = await Promise.all([
       db.collection('licenses').get(),
       db.collection('checkoutRequests').orderBy('createdAt', 'desc').limit(50).get(),
       db.collection('installationSupportRequests').orderBy('createdAt', 'desc').limit(80).get(),
       db.collection('app_settings').doc('pricing').get(),
       db.collection('app_settings').doc('site_profile').get(),
       db.collection('robotVersions').orderBy('publishedAt', 'desc').limit(25).get(),
+      db.collection('app_settings').doc('terms_of_use').get(),
     ]);
 
     const pricing = normalizePricing(pricingDoc.exists ? pricingDoc.data() : DEFAULT_PRICING);
@@ -43,6 +44,7 @@ export async function GET(request) {
       youtubeUrl: profileRaw.youtubeUrl || '',
       facebookUrl: profileRaw.facebookUrl || '',
       guideVideoUrl: profileRaw.guideVideoUrl || '',
+      testVideos: Array.isArray(profileRaw.testVideos) ? profileRaw.testVideos : [],
       sellerBrand: profileRaw.sellerBrand || '',
       sellerOwnerFullName: profileRaw.sellerOwnerFullName || '',
       sellerLegalForm: profileRaw.sellerLegalForm || '',
@@ -64,6 +66,8 @@ export async function GET(request) {
         versions: toRows(versionsSnap),
         pricing,
         siteProfile,
+        termsOfUse: termsDoc.exists ? (termsDoc.data().sections || []) : [],
+        termsUpdatedAt: termsDoc.exists ? (termsDoc.data().updatedAt?.toDate?.()?.toISOString?.() || null) : null,
       },
       { status: 200 }
     );

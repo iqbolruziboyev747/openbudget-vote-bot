@@ -213,7 +213,6 @@ export default function ShopPage() {
                 { label: 'Pasport / ID', value: passport, setValue: setPassport, placeholder: 'AB1234567' },
                 { label: 'Telefon', value: phone, setValue: setPhone, placeholder: '+998 90 123 45 67' },
                 { label: 'Manzil', value: address, setValue: setAddress, placeholder: 'Viloyat, tuman, ko cha' },
-                { label: 'MT5 hisob raqami', value: accountId, setValue: setAccountId, placeholder: '123456789' },
               ].map((row) => (
                 <div key={row.label}>
                   <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">{row.label}</label>
@@ -225,6 +224,27 @@ export default function ShopPage() {
                   />
                 </div>
               ))}
+
+              <div>
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">MT5 hisob raqami</label>
+                <input
+                  value={accountId}
+                  onChange={(e) => setAccountId(e.target.value)}
+                  placeholder="123456789"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-cyan-500"
+                />
+                <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <div className="flex items-start gap-2">
+                    <svg className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                    <div className="text-xs text-amber-800">
+                      <p className="font-bold">Diqqat! MT5 hisob raqamini to'g'ri kiriting!</p>
+                      <p className="mt-1">Litsenziya faqat shu hisob raqamiga biriktiriladi. Noto'g'ri raqam bilan olingan litsenziya ishlamaydi va qayta tiklab bo'lmaydi. MetaTrader 5 dasturida hisobingiz raqamini tekshirib oling.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="mt-5 rounded-xl border border-cyan-100 bg-cyan-50/40 p-4 text-xs text-slate-700">
@@ -292,11 +312,12 @@ export default function ShopPage() {
               <h2 className="text-lg font-black text-slate-900">Muhim eslatmalar</h2>
               <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 <li>- 1 litsenziya faqat 1 ta MT5 hisob uchun.</li>
+                <li>- <span className="font-semibold text-amber-700">MT5 hisob raqamini noto'g'ri kiritsangiz, litsenziya ishlamaydi!</span></li>
                 <li>- Litsenziya muddati tanlangan tarifga bog liq.</li>
                 <li>- Professional o rnatish tanlansa, mutaxassis siz bilan bog lanadi.</li>
               </ul>
               <div className="mt-4">
-                <Link href="/guide-mt5" className="text-cyan-700 underline">MT5 o rnatish qollanmasini ochish</Link>
+                <Link href="/guide-mt5" className="text-cyan-700 underline">Robotni o rnatish qollanmasini ochish</Link>
               </div>
             </div>
           </div>

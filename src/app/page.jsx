@@ -159,7 +159,7 @@ export default function Home() {
               href="/guide-mt5"
               className="rounded-xl border border-slate-300 bg-white px-8 py-3 text-sm font-semibold text-slate-700 transition hover:border-cyan-300 hover:text-cyan-700"
             >
-              Ornatish qollanmasi
+              Robotni o rnatish
             </Link>
           </div>
           <p className="mt-4 text-xs text-slate-500">Tugmani bosishdan oldin tariflarni ko rib chiqishingiz mumkin.</p>

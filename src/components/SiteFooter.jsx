@@ -70,7 +70,7 @@ export default function SiteFooter() {
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">Sahifalar</p>
             <ul className="space-y-2 text-xs text-slate-600">
               <li><Link href="/about" className="hover:text-slate-900 transition-colors">Robot haqida</Link></li>
-              <li><Link href="/guide-mt5" className="hover:text-slate-900 transition-colors">MT5 o'rnatish</Link></li>
+              <li><Link href="/guide-mt5" className="hover:text-slate-900 transition-colors">Robotni o'rnatish</Link></li>
               <li><Link href="/statistics" className="hover:text-slate-900 transition-colors">Statistika</Link></li>
             </ul>
           </div>
@@ -81,6 +81,7 @@ export default function SiteFooter() {
               <li><Link href="/versions" className="hover:text-slate-900 transition-colors">Versiyalar</Link></li>
               <li><Link href="/terms" className="hover:text-slate-900 transition-colors">Foydalanish shartlari</Link></li>
               <li><Link href="/license-agreement" className="hover:text-slate-900 transition-colors">Litsenziya shartnomasi</Link></li>
+              <li><Link href="/verify" className="hover:text-slate-900 transition-colors">Hujjat tekshiruvi</Link></li>
             </ul>
           </div>
           <div>
