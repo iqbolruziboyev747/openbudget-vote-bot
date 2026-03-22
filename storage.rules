@@ -16,6 +16,11 @@ service firebase.storage {
       allow read;
       allow write: if request.auth != null;
     }
+    // Team member photos: anyone can read, authenticated can write
+    match /team/{allPaths=**} {
+      allow read;
+      allow write: if request.auth != null;
+    }
     // Robots: authenticated users can write, authenticated can read
     match /robots/{allPaths=**} {
       allow read: if request.auth != null;

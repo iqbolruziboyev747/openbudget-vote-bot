@@ -48,6 +48,7 @@ export async function GET(request) {
       homeVideos: Array.isArray(profileRaw.homeVideos) ? profileRaw.homeVideos : [],
       partnerBrokers: Array.isArray(profileRaw.partnerBrokers) ? profileRaw.partnerBrokers : [],
       robotProfiles: Array.isArray(profileRaw.robotProfiles) ? profileRaw.robotProfiles : [],
+      teamMembers: Array.isArray(profileRaw.teamMembers) ? profileRaw.teamMembers : [],
       sellerBrand: profileRaw.sellerBrand || '',
       sellerOwnerFullName: profileRaw.sellerOwnerFullName || '',
       sellerLegalForm: profileRaw.sellerLegalForm || '',

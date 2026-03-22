@@ -43,6 +43,7 @@ export default function AdminPage() {
     homeVideos: [],
     partnerBrokers: [],
     robotProfiles: [],
+    teamMembers: [],
     sellerBrand: '',
     sellerOwnerFullName: '',
     sellerLegalForm: '',
@@ -768,6 +769,106 @@ export default function AdminPage() {
           </div>
 
           <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60">Havolalarni saqlash</button>
+        </section>
+
+        {/* ═══ Jamoa a'zolari ═══ */}
+        <section className="fath-shell rounded-3xl p-6 mt-6">
+          <h2 className="text-2xl font-black text-slate-900">Jamoa a&apos;zolari</h2>
+          <p className="mt-1 text-sm text-slate-600">Bosh sahifadagi &quot;Jamoamiz&quot; bo&apos;limida ko&apos;rsatiladigan jamoa a&apos;zolarini boshqaring.</p>
+
+          <div className="mt-4 rounded-lg border border-dashed border-teal-300 bg-teal-50/40 p-4">
+            <p className="text-xs font-semibold text-slate-600 mb-2">Yangi a&apos;zo qo&apos;shish</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input id="teamName" className="rounded-lg border border-teal-200 px-3 py-2 text-sm" placeholder="F.I.O (masalan: Iqbol Ruziboyev)" />
+              <input id="teamRole" className="rounded-lg border border-teal-200 px-3 py-2 text-sm" placeholder="Lavozim (masalan: Asoschi & Dasturchi)" />
+              <input id="teamBio" className="rounded-lg border border-teal-200 px-3 py-2 text-sm sm:col-span-2" placeholder="Qisqa tajriba (masalan: 5 yillik algo trading tajribasi)" />
+              <input id="teamTelegram" className="rounded-lg border border-teal-200 px-3 py-2 text-sm" placeholder="Telegram (https://t.me/...)" />
+              <input id="teamInstagram" className="rounded-lg border border-teal-200 px-3 py-2 text-sm" placeholder="Instagram (https://instagram.com/...)" />
+              <input id="teamLinkedin" className="rounded-lg border border-teal-200 px-3 py-2 text-sm" placeholder="LinkedIn (https://linkedin.com/in/...)" />
+              <div className="flex gap-2">
+                <input id="teamPhotoFile" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" className="flex-1 rounded-lg border border-teal-200 px-3 py-2 text-sm" />
+              </div>
+            </div>
+            <button
+              disabled={videoUploading}
+              onClick={async () => {
+                const nameEl = document.getElementById('teamName');
+                const roleEl = document.getElementById('teamRole');
+                const bioEl = document.getElementById('teamBio');
+                const telegramEl = document.getElementById('teamTelegram');
+                const instagramEl = document.getElementById('teamInstagram');
+                const linkedinEl = document.getElementById('teamLinkedin');
+                const fileEl = document.getElementById('teamPhotoFile');
+                const name = nameEl?.value?.trim() || '';
+                const role = roleEl?.value?.trim() || '';
+                const bio = bioEl?.value?.trim() || '';
+                const telegram = telegramEl?.value?.trim() || '';
+                const instagram = instagramEl?.value?.trim() || '';
+                const linkedin = linkedinEl?.value?.trim() || '';
+                const file = fileEl?.files?.[0];
+                if (!name) { alert('Ism kiritilmagan'); return; }
+                if (!role) { alert('Lavozim kiritilmagan'); return; }
+                if (!file) { alert('Rasm tanlang'); return; }
+                if (file.size > 5 * 1024 * 1024) { alert('Rasm hajmi 5 MB dan oshmasligi kerak'); return; }
+                setVideoUploading(true);
+                try {
+                  const stamp = Date.now();
+                  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+                  const safeName = name.replace(/[^0-9a-zA-Z._-]/g, '_').slice(0, 60);
+                  const storagePath = `team/${safeName}-${stamp}.${ext}`;
+                  const storageRef = ref(storage, storagePath);
+                  await uploadBytes(storageRef, file, {
+                    contentType: file.type || 'image/jpeg',
+                    customMetadata: { name, uploadedBy: auth.currentUser?.uid || '' },
+                  });
+                  const downloadUrl = await getDownloadURL(storageRef);
+                  setSiteProfile((p) => ({
+                    ...p,
+                    teamMembers: [...(p.teamMembers || []), { name, role, bio, photoUrl: downloadUrl, storagePath, telegram, instagram, linkedin }],
+                  }));
+                  nameEl.value = ''; roleEl.value = ''; bioEl.value = '';
+                  telegramEl.value = ''; instagramEl.value = ''; linkedinEl.value = '';
+                  fileEl.value = '';
+                  alert('Rasm yuklandi! "Jamoani saqlash" tugmasini bosing.');
+                } catch (error) {
+                  console.error('Team photo upload error:', error);
+                  alert(`Xato: ${error.message || 'Rasm yuklanmadi'}`);
+                } finally {
+                  setVideoUploading(false);
+                }
+              }}
+              className="mt-3 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
+            >
+              {videoUploading ? 'Yuklanmoqda...' : 'Qo\'shish'}
+            </button>
+          </div>
+
+          {(siteProfile.teamMembers || []).length > 0 && (
+            <div className="mt-4 space-y-2">
+              {(siteProfile.teamMembers || []).map((m, i) => (
+                <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2">
+                  <img src={m.photoUrl} alt={m.name} className="h-12 w-12 rounded-full object-cover bg-white" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-800">{m.name}</p>
+                    <p className="text-xs text-slate-600">{m.role}</p>
+                    {m.bio && <p className="text-xs text-slate-400 truncate">{m.bio}</p>}
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (!confirm(`"${m.name}" ni o'chirmoqchimisiz?`)) return;
+                      if (m.storagePath) {
+                        try { await deleteObject(ref(storage, m.storagePath)); } catch {}
+                      }
+                      setSiteProfile((p) => ({ ...p, teamMembers: p.teamMembers.filter((_, j) => j !== i) }));
+                    }}
+                    className="shrink-0 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                  >O&apos;chirish</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 disabled:opacity-60">Jamoani saqlash</button>
         </section>
 
         {/* ═══ Robot .set fayllar ═══ */}

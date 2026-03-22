@@ -66,6 +66,18 @@ export async function POST(request) {
               storagePath: String(p.storagePath || '').trim(),
             })).filter((p) => p.id && p.fileUrl)
           : [],
+        teamMembers: Array.isArray(data.teamMembers)
+          ? data.teamMembers.map((m) => ({
+              name: String(m.name || '').trim(),
+              role: String(m.role || '').trim(),
+              bio: String(m.bio || '').trim(),
+              photoUrl: String(m.photoUrl || '').trim(),
+              storagePath: String(m.storagePath || '').trim(),
+              telegram: String(m.telegram || '').trim(),
+              instagram: String(m.instagram || '').trim(),
+              linkedin: String(m.linkedin || '').trim(),
+            })).filter((m) => m.name && m.photoUrl)
+          : [],
         sellerBrand: String(data.sellerBrand || '').trim(),
         sellerOwnerFullName: String(data.sellerOwnerFullName || '').trim(),
         sellerLegalForm: String(data.sellerLegalForm || '').trim(),
