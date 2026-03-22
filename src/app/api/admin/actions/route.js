@@ -116,7 +116,7 @@ export async function POST(request) {
         }
       } catch {}
 
-      const planNames = { m1: 'MONTHLY', m3: 'QUARTER', m6: 'HALF-YEAR', y1: 'YEARLY' };
+      const planNames = { m1: 'Sinov', m3: 'Trader', m6: 'Professional', y1: 'Elite' };
       const licenseRef = db.collection('licenses').doc();
 
       await licenseRef.set({

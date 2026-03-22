@@ -1096,10 +1096,10 @@ export default function AdminPage() {
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-500">Tarif *</label>
               <select value={newLicense.planId} onChange={(e) => setNewLicense((p) => ({ ...p, planId: e.target.value }))} className="w-full rounded-lg border border-cyan-200 px-3 py-2 bg-white">
-                <option value="m1">1 oy (MONTHLY)</option>
-                <option value="m3">3 oy (QUARTER)</option>
-                <option value="m6">6 oy (HALF-YEAR)</option>
-                <option value="y1">12 oy (YEARLY)</option>
+                <option value="m1">1 oy (Sinov)</option>
+                <option value="m3">3 oy (Trader)</option>
+                <option value="m6">6 oy (Professional)</option>
+                <option value="y1">12 oy (Elite)</option>
               </select>
             </div>
             <div>

@@ -26,9 +26,9 @@ export function normalizePricing(input = {}) {
 export function makePlansFromPricing(pricingInput = {}) {
   const pricing = normalizePricing(pricingInput);
   return {
-    m1: { months: 1, amountUZS: pricing.monthly, label: 'MONTHLY' },
-    m3: { months: 3, amountUZS: pricing.quarterly, label: 'QUARTER' },
-    m6: { months: 6, amountUZS: pricing.halfYear, label: 'HALF-YEAR' },
-    y1: { months: 12, amountUZS: pricing.annual, label: 'YEARLY' },
+    m1: { months: 1, amountUZS: pricing.monthly, label: 'Sinov' },
+    m3: { months: 3, amountUZS: pricing.quarterly, label: 'Trader' },
+    m6: { months: 6, amountUZS: pricing.halfYear, label: 'Professional' },
+    y1: { months: 12, amountUZS: pricing.annual, label: 'Elite' },
   };
 }

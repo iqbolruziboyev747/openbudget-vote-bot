@@ -10,10 +10,10 @@ import SiteFooter from '../../components/SiteFooter';
 import { SELLER_LEGAL_INFO } from '../../lib/legalInfo';
 
 const makePlans = (pricing) => ([
-  { id: 'm1', name: 'MONTHLY', price: Number(pricing?.monthly || 490000), months: 1, details: 'Qisqa muddat test va moslashuv uchun.' },
-  { id: 'm3', name: 'QUARTER', price: Number(pricing?.quarterly || 1290000), months: 3, details: 'Eng mashhur tanlov. Narx va muddat balanslangan.' },
-  { id: 'm6', name: 'HALF-YEAR', price: Number(pricing?.halfYear || 2390000), months: 6, details: 'Barqaror savdo intizomi uchun qulay paket.' },
-  { id: 'y1', name: 'YEARLY', price: Number(pricing?.annual || 4490000), months: 12, details: 'Professional uzoq muddatli foydalanish uchun.' },
+  { id: 'm1', name: 'Sinov', price: Number(pricing?.monthly || 490000), months: 1, details: 'Qisqa muddat test va moslashuv uchun.', color: 'slate', features: ['FATH robot litsenziyasi', 'Telegram signal kanali', 'Texnik qo\'llab-quvvatlash', 'Robot yangilanishlari'], tagline: 'Sinab ko\'ring — bozorni robotga topshiring' },
+  { id: 'm3', name: 'Trader', price: Number(pricing?.quarterly || 1290000), months: 3, details: 'Eng mashhur tanlov. Narx va muddat balanslangan.', color: 'cyan', badge: 'Eng mashhur', features: ['FATH robot litsenziyasi', 'Telegram signal kanali', 'Texnik qo\'llab-quvvatlash', 'Robot yangilanishlari', 'Oylik shaxsiy konsultatsiya'], tagline: 'Optimal tanlov — narx va imkoniyat balansi' },
+  { id: 'm6', name: 'Professional', price: Number(pricing?.halfYear || 2390000), months: 6, details: 'Jiddiy treyderlar uchun — barqaror natija.', color: 'indigo', features: ['FATH robot litsenziyasi', 'Telegram signal kanali', 'Ustuvor texnik yordam', 'Robot yangilanishlari', 'Oylik 2 ta shaxsiy konsultatsiya', 'Maxsus signal filtrlari'], tagline: 'Jiddiy treyderlar uchun — barqaror natija' },
+  { id: 'y1', name: 'Elite', price: Number(pricing?.annual || 4490000), months: 12, details: 'Maksimal quvvat — yillik investitsiya.', color: 'amber', badge: 'Premium', features: ['FATH robot litsenziyasi', 'VIP signal kanali', 'Cheksiz shaxsiy konsultatsiya', 'Bepul professional o\'rnatish', 'Yangi versiyalarga birinchi kirish', 'Ustuvor texnik yordam', 'Maxsus signal filtrlari'], tagline: 'Maksimal quvvat — yillik investitsiya' },
 ]);
 
 function formatUZS(value) {
@@ -181,8 +181,8 @@ export default function ShopPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700">Litsenziya xaridi</p>
-              <h1 className="mt-2 text-xl font-black text-slate-900 sm:text-3xl leading-tight">Tarifni tanlang va ma lumotlarni to ldiring</h1>
-              <p className="mt-2 text-xs sm:text-sm text-slate-600">Toldirgandan keyin pastdagi katta tugma orqali xaridni yakunlaysiz.</p>
+              <h1 className="mt-2 text-xl font-black text-slate-900 sm:text-3xl leading-tight">Sizga mos tarifni tanlang</h1>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600">Har bir tarif o&apos;z ustunliklariga ega — o&apos;zingizga mosini toping.</p>
             </div>
 
           </div>
@@ -191,22 +191,60 @@ export default function ShopPage() {
         <section className="mt-4 sm:mt-6 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
           {plans.map((plan) => {
             const active = selectedPlanId === plan.id;
+            const colorMap = {
+              slate:  { ring: 'ring-slate-400', bg: 'from-slate-50 to-slate-100', badge: 'bg-slate-500', icon: '🧪', accent: 'text-slate-600', border: 'border-slate-200', check: 'text-slate-500' },
+              cyan:   { ring: 'ring-cyan-400', bg: 'from-cyan-50 to-teal-50', badge: 'bg-cyan-500', icon: '📈', accent: 'text-cyan-700', border: 'border-cyan-200', check: 'text-cyan-600' },
+              indigo: { ring: 'ring-indigo-400', bg: 'from-indigo-50 to-violet-50', badge: 'bg-indigo-500', icon: '🏆', accent: 'text-indigo-700', border: 'border-indigo-200', check: 'text-indigo-600' },
+              amber:  { ring: 'ring-amber-400', bg: 'from-amber-50 to-orange-50', badge: 'bg-amber-500', icon: '👑', accent: 'text-amber-700', border: 'border-amber-200', check: 'text-amber-600' },
+            };
+            const c = colorMap[plan.color] || colorMap.slate;
+            const perMonth = plan.months > 1 ? Math.round(plan.price / plan.months) : null;
+            const savePct = plan.months > 1 ? Math.round((1 - plan.price / plan.months / (plans[0].price / plans[0].months)) * 100) : 0;
+
             return (
               <button
                 key={plan.id}
                 type="button"
                 onClick={() => setSelectedPlanId(plan.id)}
-                className={`fath-shell rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-left transition ${
-                  active ? 'ring-2 ring-cyan-300 border-cyan-300' : 'hover:border-cyan-200'
-                }`}
+                className={`relative rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-left transition-all duration-200 bg-gradient-to-br ${c.bg} border ${active ? `${c.ring} ring-2 ${c.border}` : 'border-white/80 hover:shadow-md'} ${plan.color === 'amber' ? 'sm:scale-[1.02]' : ''}`}
               >
+                {/* Badge */}
+                {plan.badge && (
+                  <span className={`absolute -top-2.5 right-3 sm:right-4 ${c.badge} text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm`}>
+                    ⭐ {plan.badge}
+                  </span>
+                )}
+
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">{plan.name}</p>
-                  <span className={`h-4 w-4 rounded-full border ${active ? 'border-cyan-600 bg-cyan-600' : 'border-slate-300'}`} />
+                  <span className="text-lg sm:text-xl">{c.icon}</span>
+                  <span className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full border-2 flex items-center justify-center ${active ? `${c.border} ${c.badge}` : 'border-slate-300 bg-white'}`}>
+                    {active && <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>}
+                  </span>
                 </div>
-                <p className="mt-2 sm:mt-3 text-base sm:text-2xl font-black text-slate-900 leading-tight">{formatUZS(plan.price)}</p>
+
+                <h3 className={`mt-2 text-sm sm:text-base font-black ${c.accent}`}>{plan.name}</h3>
+                <p className="mt-1 sm:mt-2 text-base sm:text-2xl font-black text-slate-900 leading-tight">{formatUZS(plan.price)}</p>
                 <p className="text-[10px] sm:text-xs text-slate-500">{plan.months} oy</p>
-                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-600 hidden sm:block">{plan.details}</p>
+
+                {/* Per month & savings */}
+                {perMonth && (
+                  <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+                    ~{formatUZS(perMonth)}/oy
+                    {savePct > 0 && <span className="ml-1 font-bold text-emerald-600">-{savePct}%</span>}
+                  </p>
+                )}
+
+                {/* Features - desktop only */}
+                <ul className="mt-2 sm:mt-3 space-y-1 hidden sm:block">
+                  {plan.features.map((f, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-slate-600">
+                      <svg className={`mt-0.5 h-3 w-3 flex-shrink-0 ${c.check}`} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mt-2 text-[10px] sm:text-xs italic text-slate-400 hidden sm:block">{plan.tagline}</p>
               </button>
             );
           })}
