@@ -6,7 +6,7 @@ import { CONTRACT_TERMS, SELLER_LEGAL_INFO } from '../../../lib/legalInfo';
 import { DEFAULT_PRICING, makePlansFromPricing, normalizePricing } from '../../../lib/pricing';
 
 // Temporary test mode: bypass Payme checkout and issue license immediately.
-const TEST_PAYMENT_MODE = true;
+const TEST_PAYMENT_MODE = false;
 
 function generateOrderId() {
   const tail = `${Date.now()}${Math.floor(Math.random() * 1000)}`.slice(-8);

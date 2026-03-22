@@ -26,6 +26,9 @@ export async function GET() {
       facebookUrl: data.facebookUrl || '',
       guideVideoUrl: data.guideVideoUrl || '',
       testVideos: Array.isArray(data.testVideos) ? data.testVideos : [],
+      homeVideos: Array.isArray(data.homeVideos) ? data.homeVideos : [],
+      partnerBrokers: Array.isArray(data.partnerBrokers) ? data.partnerBrokers : [],
+      robotProfiles: Array.isArray(data.robotProfiles) ? data.robotProfiles : [],
       seller: {
         brand: data.sellerBrand || SELLER_LEGAL_INFO.brand,
         ownerFullName: data.sellerOwnerFullName || SELLER_LEGAL_INFO.ownerFullName,

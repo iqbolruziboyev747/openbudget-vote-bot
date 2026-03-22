@@ -107,6 +107,10 @@ const steps = [
 export default function AboutPage() {
   const [testVideos, setTestVideos] = useState([]);
   const [openStrategy, setOpenStrategy] = useState(0);
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchDelta, setTouchDelta] = useState(0);
+  const [swiping, setSwiping] = useState(false);
 
   useEffect(() => {
     fetch('/api/public/site-profile')
@@ -154,26 +158,182 @@ export default function AboutPage() {
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
 
         {/* About */}
-        <section className="fath-shell rounded-3xl p-7 mb-8">
-          <h2 className="text-xl font-black text-slate-900 mb-4">FATH nima?</h2>
+        <section className="fath-shell rounded-2xl sm:rounded-3xl p-5 sm:p-7 mb-8">
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-4">FATH nima?</h2>
+          
+          <div className="rounded-2xl border border-cyan-100 bg-gradient-to-br from-cyan-50/60 to-white p-5 mb-5">
+            <p className="text-sm font-bold text-slate-800 leading-7">
+              🔥 FATH — bu oddiy robot emas. Bu <span className="text-cyan-700">strategiya</span>. Bu <span className="text-cyan-700">tizim</span>. Bu <span className="text-cyan-700">natija</span>.
+            </p>
+          </div>
+
           <div className="space-y-3 text-sm leading-7 text-slate-600">
             <p>
-              FATH — MetaTrader 5 platformasi uchun mo'ljallangan professional algoritmik savdo roboti. 
-              Robot <span className="text-cyan-700 font-bold">Gann Square of Nine</span> matematikasiga asoslanib, 
-              M15 timeframe da narx darajalarini hisoblaydi va avtomatik savdo buyruqlarini bajaradi.
+              FATH — bu shunchaki savdo roboti emas. Bu <strong className="text-slate-900">100 yillik matematik va geometrik bilimlarga asoslangan</strong> professional trading tizimi.
             </p>
             <p>
-              Robot bozorni doimiy tahlil qiladi, narx muhim darajaga yetganda signal hosil qiladi, 
-              xavfni nazorat qiladi va intizomli savdo yuritadi. Inson his-tuyg'usiz, 
-              faqat matematika va algoritmga tayangan holda ishlaydi.
+              Uning yuragi — afsonaviy <span className="text-cyan-700 font-bold">Gann metodologiyasi</span>. Bu metod orqali bozor harakatlari tasodif emas, balki aniq hisoblangan qonuniyatlar ekanligi isbotlangan.
             </p>
-            <p>
-              Tavsiya etilgan minimal depozit <strong className="text-slate-900">$100</strong>, amaliy savdoda 
-              <strong className="text-slate-900"> $500-1000</strong> va undan yuqori depozit tavsiya etiladi. 
-              Litsenziya asosida faqat bitta MT5 real hisobda ishlaydi.
+          </div>
+
+          <div className="mt-5 mb-4">
+            <h3 className="text-base font-black text-slate-900 mb-3">💡 Nega aynan FATH?</h3>
+            <p className="text-sm text-slate-500 mb-4">Bozorda minglab robotlar bor. Lekin ularning aksariyati indikatorlarga bog&apos;langan, kechikadi yoki noto&apos;g&apos;ri signal beradi. FATH esa boshqacha ishlaydi:</p>
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {[
+                { icon: '📐', text: "Bozorni oldindan hisoblaydi — matematik darajalar orqali" },
+                { icon: '🧠', text: "Emotsiyasiz savdo qiladi — inson xatolari yo'q" },
+                { icon: '🎯', text: "Aniq kirish nuqtalarini topadi — Strong Level asosida" },
+                { icon: '🔄', text: "O'zini o'zi tiklaydi — Recovery tizimi bilan zararlarni yopadi" },
+                { icon: '⏰', text: "24/7 ishlaydi — siz uxlayotganda ham foyda qidiradi" },
+              ].map((item) => (
+                <div key={item.text} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-3.5">
+                  <span className="text-lg shrink-0">{item.icon}</span>
+                  <p className="text-sm text-slate-700 leading-relaxed">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 mt-2">
+            <p className="text-xs text-emerald-800">
+              Tavsiya etilgan minimal depozit <strong>$100</strong>, amaliy savdoda <strong>$500–1000</strong> va undan yuqori depozit tavsiya etiladi. Litsenziya asosida faqat bitta MT5 real hisobda ishlaydi.
             </p>
           </div>
         </section>
+
+        {/* Test Videos — 3D Coverflow Carousel */}
+        {testVideos.length > 0 && (
+          <section className="relative overflow-hidden rounded-3xl py-10 sm:py-14 mb-8" style={{ background: 'linear-gradient(135deg, #ecfeff 0%, #f0f9ff 40%, #eff6ff 70%, #ecfeff 100%)' }}>
+            <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[350px] rounded-full bg-cyan-400/[0.12] blur-[100px]" />
+
+            <div className="relative px-4 sm:px-6">
+              <div className="text-center mb-8">
+                <span className="inline-flex rounded-full border border-cyan-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-700 mb-3">
+                  Test natijalari
+                </span>
+                <h2 className="text-xl font-black text-slate-900 sm:text-2xl">Test natijalari va videolar</h2>
+                <p className="mt-2 text-sm text-slate-500">Real va demo hisobdagi test natijalari video shaklida</p>
+              </div>
+
+              {/* 3D Coverflow Container */}
+              <div
+                className="relative mx-auto select-none"
+                style={{ perspective: '1200px', height: 'clamp(220px, 50vw, 480px)' }}
+                onTouchStart={(e) => {
+                  setTouchStart(e.touches[0].clientX);
+                  setTouchDelta(0);
+                  setSwiping(true);
+                }}
+                onTouchMove={(e) => {
+                  if (touchStart === null) return;
+                  setTouchDelta(e.touches[0].clientX - touchStart);
+                }}
+                onTouchEnd={() => {
+                  if (Math.abs(touchDelta) > 50) {
+                    if (touchDelta < 0) setSelectedIdx((p) => (p < testVideos.length - 1 ? p + 1 : 0));
+                    else setSelectedIdx((p) => (p > 0 ? p - 1 : testVideos.length - 1));
+                  }
+                  setTouchStart(null);
+                  setTouchDelta(0);
+                  setSwiping(false);
+                }}
+              >
+                {testVideos.map((vid, idx) => {
+                  const offset = idx - selectedIdx;
+                  const abs = Math.abs(offset);
+                  if (abs > 3) return null;
+
+                  const isCenter = offset === 0;
+                  const swipePx = swiping ? touchDelta * 0.12 : 0;
+                  const ry = -offset * 32;
+                  const tz = -abs * 140;
+                  const sc = isCenter ? 1.15 : Math.max(0.75 - abs * 0.08, 0.45);
+                  const op = abs === 0 ? 1 : abs === 1 ? 0.8 : abs === 2 ? 0.45 : 0.2;
+
+                  return (
+                    <div
+                      key={idx}
+                      className="absolute top-1/2"
+                      style={{
+                        width: isCenter ? 'clamp(260px, 70vw, 680px)' : 'clamp(120px, 28vw, 320px)',
+                        aspectRatio: '16 / 9',
+                        left: `calc(50% + ${offset * (isCenter ? 0 : 26)}%)`,
+                        transform: `translateX(calc(-50% + ${swipePx}px)) translateY(-50%) translateZ(${tz}px) rotateY(${ry}deg) scale(${sc})`,
+                        zIndex: 10 - abs,
+                        opacity: op,
+                        transition: swiping ? 'none' : 'all 0.6s cubic-bezier(0.32, 0.72, 0, 1)',
+                        transformStyle: 'preserve-3d',
+                        filter: isCenter ? 'none' : `brightness(${Math.max(0.7 - abs * 0.1, 0.35)})`,
+                      }}
+                      onClick={() => !isCenter && setSelectedIdx(idx)}
+                    >
+                      <div className={`relative h-full w-full rounded-2xl sm:rounded-3xl overflow-hidden ${
+                        isCenter
+                          ? 'ring-2 ring-cyan-400/50 shadow-2xl shadow-cyan-400/30'
+                          : 'shadow-xl shadow-slate-400/40 cursor-pointer'
+                      }`}>
+                        <video
+                          className="h-full w-full object-contain bg-slate-900"
+                          src={vid.url}
+                          controls={isCenter}
+                          playsInline
+                          muted={!isCenter}
+                          controlsList="nodownload"
+                        />
+                        {vid.title && isCenter && (
+                          <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent px-4 pt-3 pb-8 pointer-events-none">
+                            <p className="text-sm sm:text-base font-bold text-white drop-shadow-lg">{vid.title}</p>
+                          </div>
+                        )}
+                        {!isCenter && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                              <svg className="h-4 w-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Desktop navigation arrows */}
+                {testVideos.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedIdx((p) => (p > 0 ? p - 1 : testVideos.length - 1))}
+                      className="hidden sm:flex absolute left-1 lg:left-4 top-1/2 -translate-y-1/2 z-30 h-11 w-11 items-center justify-center rounded-full bg-white/80 border border-slate-200 text-slate-600 shadow-lg backdrop-blur-md transition-all hover:bg-white hover:text-cyan-700 hover:border-cyan-300 hover:scale-110 cursor-pointer"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button
+                      onClick={() => setSelectedIdx((p) => (p < testVideos.length - 1 ? p + 1 : 0))}
+                      className="hidden sm:flex absolute right-1 lg:right-4 top-1/2 -translate-y-1/2 z-30 h-11 w-11 items-center justify-center rounded-full bg-white/80 border border-slate-200 text-slate-600 shadow-lg backdrop-blur-md transition-all hover:bg-white hover:text-cyan-700 hover:border-cyan-300 hover:scale-110 cursor-pointer"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Navigation dots */}
+              {testVideos.length > 1 && (
+                <div className="flex justify-center gap-2 mt-5">
+                  {testVideos.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedIdx(idx)}
+                      className={`rounded-full transition-all duration-300 cursor-pointer ${
+                        selectedIdx === idx ? 'w-8 h-2.5 bg-cyan-600 shadow-lg shadow-cyan-400/40' : 'w-2.5 h-2.5 bg-slate-300 hover:bg-cyan-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Stats */}
         <section className="mb-8">
@@ -191,7 +351,7 @@ export default function AboutPage() {
 
         {/* Strategy Accordion */}
         <section className="mb-8">
-          <h2 className="text-xl font-black text-slate-900 mb-1">Savdo strategiyasi — batafsil</h2>
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-1">Savdo strategiyasi — batafsil</h2>
           <p className="text-sm text-slate-500 mb-5">Robotning ishlash prinsipi va har bir tarkibiy qism haqida</p>
 
           <div className="space-y-3">
@@ -229,40 +389,10 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Test Videos */}
-        {testVideos.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-xl font-black text-slate-900 mb-1">🎬 Test natijalari va videolar</h2>
-            <p className="text-sm text-slate-500 mb-5">Real va demo hisobdagi test natijalari video shaklida</p>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {testVideos.map((video, idx) => (
-                <div key={idx} className="fath-shell rounded-2xl overflow-hidden group hover:ring-2 hover:ring-cyan-200 transition-all">
-                  <video
-                    className="h-52 w-full bg-slate-100 object-contain sm:h-56"
-                    src={video.url}
-                    controls
-                    preload="metadata"
-                    playsInline
-                    controlsList="nodownload"
-                    poster=""
-                  />
-                  {video.title && (
-                    <div className="flex items-center gap-3 px-4 py-3 border-t border-cyan-100">
-                      <span className="text-base">▶️</span>
-                      <p className="text-sm font-bold text-slate-800">{video.title}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* How it works */}
-        <section className="border-y border-cyan-100 bg-white/70 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-10 mb-8">
-          <h2 className="text-xl font-black text-slate-900 mb-6">Robot qanday ishlaydi?</h2>
-          <div className="grid gap-4 md:grid-cols-5">
+        <section className="border-y border-cyan-100 bg-white/70 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 mb-8">
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-5 sm:mb-6">Robot qanday ishlaydi?</h2>
+          <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-5">
             {steps.map((s) => (
               <article key={s.n} className="fath-shell rounded-2xl p-5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-100 text-sm font-black text-cyan-700">{s.n}</div>
@@ -275,7 +405,7 @@ export default function AboutPage() {
 
         {/* Features */}
         <section className="mb-8">
-          <h2 className="text-xl font-black text-slate-900 mb-5">Asosiy xususiyatlar</h2>
+          <h2 className="text-lg sm:text-xl font-black text-slate-900 mb-5">Asosiy xususiyatlar</h2>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f) => (
               <article key={f.title} className="fath-shell rounded-2xl p-5">
@@ -288,8 +418,8 @@ export default function AboutPage() {
         </section>
 
         {/* Risk Warning */}
-        <section className="mb-8 rounded-2xl border-2 border-red-200 bg-red-50 p-6">
-          <h2 className="text-lg font-black text-red-700">⚠️ Risk ogohlantirishlari</h2>
+        <section className="mb-8 rounded-2xl border-2 border-red-200 bg-red-50 p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-black text-red-700">⚠️ Risk ogohlantirishlari</h2>
           <ul className="mt-3 space-y-2 text-sm leading-relaxed text-red-800">
             <li>• Forex va CFD savdosi yuqori riskli. Sarmoyangizni qisman yoki to'liq yo'qotish ehtimoli bor.</li>
             <li>• Robot faqat yordamchi vosita — hech qanday foyda kafolatlanmaydi.</li>

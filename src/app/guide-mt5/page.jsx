@@ -202,8 +202,13 @@ const allSteps = [
         text: "Risk darajasi (RiskPercent), lot hajmi va boshqa parametrlarni o'zingizning savdo strategiyangizga moslab sozlang. Boshlang'ichlar uchun standart sozlamalarni o'zgartirmaslik tavsiya etiladi.",
         tip: "Dastlab standart sozlamalar bilan ishlang. Tajriba ortgach, parametrlarni o'zgartiring.",
       },
+      {
+        heading: "📁 Tayyor .set fayl bilan sozlash (tavsiya!)",
+        text: "Robot sozlamalarini qo'lda kiritish o'rniga, saytdagi \"Sozlamalar\" sahifasidan tayyor .set faylni yuklab oling. Buning uchun: 1) Saytda \"Sozlamalar\" sahifasiga kiring. 2) Slayderlar yordamida o'z strategiyangizni tanlang. 3) \"Sozlamani yuklash (.set)\" tugmasini bosing. 4) MT5 da robot Properties → Inputs oynasida pastdagi \"Load\" tugmasini bosing va yuklab olingan .set faylni tanlang.",
+        tip: "Tayyor .set fayl barcha sozlamalarni avtomatik o'rnatadi — faqat litsenziya kalitini qo'lda kiritish kerak.",
+      },
     ],
-    link: { href: '/dashboard', label: "Dashboard ga o'tish →" },
+    link: { href: '/robot-settings', label: "Sozlamalar sahifasi →" },
   },
   {
     id: 8,
@@ -350,11 +355,14 @@ export default function GuidePage() {
   const [openStep, setOpenStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
 
+  const [partnerBrokers, setPartnerBrokers] = useState([]);
+
   useEffect(() => {
     fetch('/api/public/site-profile')
       .then((r) => r.json())
       .then((data) => {
         if (data?.profile?.guideVideoUrl) setGuideVideoUrl(data.profile.guideVideoUrl);
+        if (data?.profile?.partnerBrokers?.length) setPartnerBrokers(data.profile.partnerBrokers);
       })
       .catch(() => {});
   }, []);
@@ -433,6 +441,39 @@ export default function GuidePage() {
             )}
           </div>
         </section>
+
+        {/* Broker Selection Step */}
+        {partnerBrokers.length > 0 && (
+          <section className="mb-5 rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-50 to-white p-5 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-xl">🏦</div>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Birinchi qadam</span>
+                <h3 className="text-lg font-bold text-slate-900">Broker tanlang va MT5 hisob oching</h3>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              FATH robot bilan savdo qilish uchun avval brokerda MetaTrader 5 hisob ochishingiz kerak. 
+              Quyidagi ishonchli brokerlardan birini tanlang — ro'yxatdan o'tish bepul va bir necha daqiqa oladi.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {partnerBrokers.map((broker, idx) => (
+                <a
+                  key={idx}
+                  href={broker.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 transition-all hover:shadow-lg hover:border-emerald-300 hover:-translate-y-1 w-28 sm:w-32"
+                >
+                  <img src={broker.logoUrl} alt={broker.name} className="h-10 w-10 sm:h-12 sm:w-12 object-contain" />
+                  <span className="text-[10px] sm:text-xs font-bold text-slate-700 text-center leading-tight">{broker.name}</span>
+                  <span className="text-[10px] font-semibold text-emerald-600">Hisob ochish →</span>
+                </a>
+              ))}
+            </div>
+            <p className="mt-3 text-xs text-slate-500">Allaqachon MT5 hisobingiz bormi? Bu qadamni o'tkazib yuboring.</p>
+          </section>
+        )}
 
         {/* Steps */}
         <section className="mb-10">

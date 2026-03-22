@@ -9,13 +9,13 @@ import { auth } from '../lib/firebase';
 import useAuthUser from '../lib/useAuthUser';
 
 const links = [
-  { href: '/about',      label: 'Robot haqida' },
-  { href: '/guide-mt5',  label: "Robotni o'rnatish" },
-  { href: '/robot-status', label: 'Robot holati' },
-  { href: '/statistics', label: 'Statistika' },
-  { href: '/versions',   label: 'Versiyalar' },
-  { href: '/shop',       label: 'Tariflar' },
-  { href: '/terms',      label: 'Shartlar' },
+  { href: '/about',          label: 'Imkoniyatlar' },
+  { href: '/robot-settings', label: 'Sozlamalar' },
+  { href: '/guide-mt5',      label: "O'rnatish" },
+  { href: '/statistics',     label: 'Statistika' },
+  { href: '/versions',       label: 'Versiyalar' },
+  { href: '/shop',           label: 'Tariflar' },
+  { href: '/terms',          label: 'FAQ' },
 ];
 
 export default function SiteHeader() {
@@ -53,26 +53,19 @@ export default function SiteHeader() {
           })}
         </nav>
         <div className="flex items-center gap-2">
-          <Link
-            href="/admin"
-            className="hidden rounded-md border border-slate-300 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 sm:inline-flex"
-          >
-            Admin
-          </Link>
+          {user && (
+            <Link
+              href="/admin"
+              className="hidden rounded-md border border-slate-300 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 sm:inline-flex"
+            >
+              Admin
+            </Link>
+          )}
           <Link
             href="/dashboard"
             className="hidden rounded-md border border-slate-300 px-3.5 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-400 hover:text-slate-900 md:inline-flex"
           >
             Kabinet
-          </Link>
-          <Link
-            href="/dashboard"
-            title="Kabinet"
-            className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
           </Link>
           {user ? (
             <>
@@ -148,9 +141,11 @@ export default function SiteHeader() {
                 </Link>
               );
             })}
-            <Link href="/admin" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-cyan-50">
-              Admin
-            </Link>
+            {user && (
+              <Link href="/admin" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-cyan-50">
+                Admin
+              </Link>
+            )}
             <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-cyan-50">
               Kabinet
             </Link>

@@ -47,6 +47,7 @@ export default function ShopPage() {
     annual: 4490000,
     installationSupport: 150000,
   });
+  const [partnerBrokers, setPartnerBrokers] = useState([]);
 
   const plans = useMemo(() => makePlans(pricing), [pricing]);
 
@@ -70,6 +71,13 @@ export default function ShopPage() {
     };
 
     loadPricing();
+
+    fetch('/api/public/site-profile')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.profile?.partnerBrokers?.length) setPartnerBrokers(data.profile.partnerBrokers);
+      })
+      .catch(() => {});
   }, []);
 
 
@@ -169,18 +177,18 @@ export default function ShopPage() {
       <SiteHeader />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <section className="fath-shell rounded-3xl p-8">
+        <section className="fath-shell rounded-2xl sm:rounded-3xl p-5 sm:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-cyan-700">Litsenziya xaridi</p>
-              <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">Tarifni tanlang va ma lumotlarni to ldiring</h1>
-              <p className="mt-2 text-sm text-slate-600">Toldirgandan keyin pastdagi katta tugma orqali xaridni yakunlaysiz.</p>
+              <h1 className="mt-2 text-xl font-black text-slate-900 sm:text-3xl leading-tight">Tarifni tanlang va ma lumotlarni to ldiring</h1>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600">Toldirgandan keyin pastdagi katta tugma orqali xaridni yakunlaysiz.</p>
             </div>
 
           </div>
         </section>
 
-        <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mt-4 sm:mt-6 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4">
           {plans.map((plan) => {
             const active = selectedPlanId === plan.id;
             return (
@@ -188,25 +196,25 @@ export default function ShopPage() {
                 key={plan.id}
                 type="button"
                 onClick={() => setSelectedPlanId(plan.id)}
-                className={`fath-shell rounded-2xl p-5 text-left transition ${
+                className={`fath-shell rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-left transition ${
                   active ? 'ring-2 ring-cyan-300 border-cyan-300' : 'hover:border-cyan-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{plan.name}</p>
+                  <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">{plan.name}</p>
                   <span className={`h-4 w-4 rounded-full border ${active ? 'border-cyan-600 bg-cyan-600' : 'border-slate-300'}`} />
                 </div>
-                <p className="mt-3 text-2xl font-black text-slate-900">{formatUZS(plan.price)}</p>
-                <p className="text-xs text-slate-500">{plan.months} oy</p>
-                <p className="mt-2 text-sm text-slate-600">{plan.details}</p>
+                <p className="mt-2 sm:mt-3 text-base sm:text-2xl font-black text-slate-900 leading-tight">{formatUZS(plan.price)}</p>
+                <p className="text-[10px] sm:text-xs text-slate-500">{plan.months} oy</p>
+                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-slate-600 hidden sm:block">{plan.details}</p>
               </button>
             );
           })}
         </section>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-2">
-          <div className="fath-shell rounded-2xl p-6">
-            <h2 className="text-lg font-black text-slate-900">Xaridor ma lumotlari</h2>
+        <section className="mt-4 sm:mt-6 grid gap-4 sm:gap-6 lg:grid-cols-2">
+          <div className="fath-shell rounded-2xl p-4 sm:p-6">
+            <h2 className="text-base sm:text-lg font-black text-slate-900">Xaridor ma lumotlari</h2>
             <div className="mt-4 space-y-3">
               {[
                 { label: 'F.I.Sh', value: fullName, setValue: setFullName, placeholder: 'To liq ism-sharif' },
@@ -244,6 +252,28 @@ export default function ShopPage() {
                     </div>
                   </div>
                 </div>
+
+                {partnerBrokers.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-cyan-200 bg-cyan-50/60 p-3">
+                    <p className="text-xs font-bold text-cyan-800">MT5 hisobingiz yo'qmi?</p>
+                    <p className="mt-1 text-xs text-cyan-700">Quyidagi ishonchli brokerlardan birida bepul hisob oching va savdoni boshlang:</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {partnerBrokers.map((broker, idx) => (
+                        <a
+                          key={idx}
+                          href={broker.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 rounded-lg border border-cyan-200 bg-white px-2.5 py-1.5 transition-all hover:border-cyan-400 hover:shadow-sm"
+                        >
+                          <img src={broker.logoUrl} alt={broker.name} className="h-5 w-5 object-contain" />
+                          <span className="text-[11px] font-semibold text-slate-700">{broker.name}</span>
+                          <svg className="h-3 w-3 text-cyan-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -269,8 +299,8 @@ export default function ShopPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="fath-shell rounded-2xl p-6">
-              <h2 className="text-lg font-black text-slate-900">Qoshimcha xizmat</h2>
+            <div className="fath-shell rounded-2xl p-4 sm:p-6">
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Qoshimcha xizmat</h2>
               <p className="mt-1 text-sm text-slate-600">Professional mutaxassis yordamida o rnatish xizmati.</p>
 
               <label className="mt-4 flex items-start gap-3 cursor-pointer rounded-xl border border-slate-200 p-4">
@@ -308,8 +338,8 @@ export default function ShopPage() {
               )}
             </div>
 
-            <div className="fath-shell rounded-2xl p-6">
-              <h2 className="text-lg font-black text-slate-900">Muhim eslatmalar</h2>
+            <div className="fath-shell rounded-2xl p-4 sm:p-6">
+              <h2 className="text-base sm:text-lg font-black text-slate-900">Muhim eslatmalar</h2>
               <ul className="mt-3 space-y-2 text-sm text-slate-600">
                 <li>- 1 litsenziya faqat 1 ta MT5 hisob uchun.</li>
                 <li>- <span className="font-semibold text-amber-700">MT5 hisob raqamini noto'g'ri kiritsangiz, litsenziya ishlamaydi!</span></li>
@@ -323,14 +353,14 @@ export default function ShopPage() {
           </div>
         </section>
 
-        <section className="mt-6 fath-shell rounded-3xl p-6">
+        <section className="mt-4 sm:mt-6 fath-shell rounded-2xl sm:rounded-3xl p-4 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500">Tanlangan tarif</p>
-              <p className="text-lg font-black text-slate-900">{selectedPlan.name}</p>
-              <p className="text-sm text-slate-600">{selectedPlan.months} oy</p>
-              <p className="mt-2 text-sm text-slate-500">Jami to lov</p>
-              <p className="text-2xl font-black text-cyan-700">{formatUZS(totalAmount)}</p>
+              <p className="text-xs sm:text-sm text-slate-500">Tanlangan tarif</p>
+              <p className="text-base sm:text-lg font-black text-slate-900">{selectedPlan.name}</p>
+              <p className="text-xs sm:text-sm text-slate-600">{selectedPlan.months} oy</p>
+              <p className="mt-2 text-xs sm:text-sm text-slate-500">Jami to lov</p>
+              <p className="text-xl sm:text-2xl font-black text-cyan-700">{formatUZS(totalAmount)}</p>
             </div>
 
             <button

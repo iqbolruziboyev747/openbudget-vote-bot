@@ -40,6 +40,9 @@ export default function AdminPage() {
     facebookUrl: '',
     guideVideoUrl: '',
     testVideos: [],
+    homeVideos: [],
+    partnerBrokers: [],
+    robotProfiles: [],
     sellerBrand: '',
     sellerOwnerFullName: '',
     sellerLegalForm: '',
@@ -561,7 +564,289 @@ export default function AdminPage() {
             )}
           </div>
 
+          {/* Home page videos */}
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-slate-700">Asosiy sahifa videolari</p>
+            </div>
+
+            <div className="mb-3 rounded-lg border border-dashed border-emerald-300 bg-emerald-50/40 p-4">
+              <p className="text-xs font-semibold text-slate-600 mb-2">Yangi video yuklash (asosiy sahifa)</p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  id="homeVideoTitle"
+                  className="flex-1 rounded-lg border border-emerald-200 px-3 py-2 text-sm"
+                  placeholder="Video sarlavhasi"
+                />
+                <input
+                  id="homeVideoFile"
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                  className="flex-1 rounded-lg border border-emerald-200 px-3 py-2 text-sm"
+                />
+                <button
+                  disabled={videoUploading}
+                  onClick={async () => {
+                    const titleEl = document.getElementById('homeVideoTitle');
+                    const fileEl = document.getElementById('homeVideoFile');
+                    const title = titleEl?.value?.trim() || '';
+                    const file = fileEl?.files?.[0];
+                    if (!file) { alert('Video faylni tanlang'); return; }
+                    if (!title) { alert('Video sarlavhasini kiriting'); return; }
+                    if (file.size > 100 * 1024 * 1024) { alert('Fayl hajmi 100 MB dan oshmasligi kerak'); return; }
+
+                    setVideoUploading(true);
+                    try {
+                      const stamp = Date.now();
+                      const ext = file.name.split('.').pop()?.toLowerCase() || 'mp4';
+                      const safeName = title.replace(/[^0-9a-zA-Z._-]/g, '_').slice(0, 60);
+                      const storagePath = `videos/home-${safeName}-${stamp}.${ext}`;
+                      const storageRef = ref(storage, storagePath);
+
+                      await uploadBytes(storageRef, file, {
+                        contentType: file.type || 'video/mp4',
+                        customMetadata: { title, uploadedBy: auth.currentUser?.uid || '' },
+                      });
+
+                      const downloadUrl = await getDownloadURL(storageRef);
+
+                      setSiteProfile((p) => ({
+                        ...p,
+                        homeVideos: [...(p.homeVideos || []), { title, url: downloadUrl, storagePath }],
+                      }));
+
+                      titleEl.value = '';
+                      fileEl.value = '';
+                      alert('Video yuklandi! "Havolalarni saqlash" tugmasini bosing.');
+                    } catch (error) {
+                      console.error('Video upload error:', error);
+                      alert(`Xato: ${error.message || 'Video yuklanmadi'}`);
+                    } finally {
+                      setVideoUploading(false);
+                    }
+                  }}
+                  className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {videoUploading ? 'Yuklanmoqda...' : 'Yuklash'}
+                </button>
+              </div>
+            </div>
+
+            {(siteProfile.homeVideos || []).length > 0 && (
+              <div className="space-y-2">
+                {(siteProfile.homeVideos || []).map((v, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2">
+                    <span className="text-lg">🏠</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{v.title || `Video ${i + 1}`}</p>
+                      <p className="text-xs text-slate-500 truncate">{v.storagePath || v.url || '-'}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${v.title || 'Video'}" ni o'chirmoqchimisiz?`)) return;
+                        const path = v.storagePath || v.objectPath;
+                        if (path) {
+                          try {
+                            await deleteObject(ref(storage, path));
+                          } catch {}
+                        }
+                        setSiteProfile((p) => ({ ...p, homeVideos: p.homeVideos.filter((_, j) => j !== i) }));
+                      }}
+                      className="shrink-0 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                    >O'chirish</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Partner Brokers */}
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold text-slate-700">Hamkor brokerlar (asosiy sahifa)</p>
+            </div>
+
+            <div className="mb-3 rounded-lg border border-dashed border-violet-300 bg-violet-50/40 p-4">
+              <p className="text-xs font-semibold text-slate-600 mb-2">Yangi broker qo&apos;shish</p>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    id="brokerName"
+                    className="flex-1 rounded-lg border border-violet-200 px-3 py-2 text-sm"
+                    placeholder="Broker nomi (masalan: RoboForex)"
+                  />
+                  <input
+                    id="brokerUrl"
+                    className="flex-1 rounded-lg border border-violet-200 px-3 py-2 text-sm"
+                    placeholder="Broker havolasi (https://...)"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    id="brokerLogoFile"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg"
+                    className="flex-1 rounded-lg border border-violet-200 px-3 py-2 text-sm"
+                  />
+                  <button
+                    disabled={videoUploading}
+                    onClick={async () => {
+                      const nameEl = document.getElementById('brokerName');
+                      const urlEl = document.getElementById('brokerUrl');
+                      const fileEl = document.getElementById('brokerLogoFile');
+                      const name = nameEl?.value?.trim() || '';
+                      const url = urlEl?.value?.trim() || '';
+                      const file = fileEl?.files?.[0];
+                      if (!name) { alert('Broker nomini kiriting'); return; }
+                      if (!file) { alert('Logo rasmni tanlang'); return; }
+                      if (file.size > 5 * 1024 * 1024) { alert('Logo hajmi 5 MB dan oshmasligi kerak'); return; }
+
+                      setVideoUploading(true);
+                      try {
+                        const stamp = Date.now();
+                        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+                        const safeName = name.replace(/[^0-9a-zA-Z._-]/g, '_').slice(0, 60);
+                        const storagePath = `brokers/${safeName}-${stamp}.${ext}`;
+                        const storageRef = ref(storage, storagePath);
+
+                        await uploadBytes(storageRef, file, {
+                          contentType: file.type || 'image/png',
+                          customMetadata: { name, uploadedBy: auth.currentUser?.uid || '' },
+                        });
+
+                        const downloadUrl = await getDownloadURL(storageRef);
+
+                        setSiteProfile((p) => ({
+                          ...p,
+                          partnerBrokers: [...(p.partnerBrokers || []), { name, url, logoUrl: downloadUrl, storagePath }],
+                        }));
+
+                        nameEl.value = '';
+                        urlEl.value = '';
+                        fileEl.value = '';
+                        alert('Broker logosi yuklandi! "Havolalarni saqlash" tugmasini bosing.');
+                      } catch (error) {
+                        console.error('Broker logo upload error:', error);
+                        alert(`Xato: ${error.message || 'Logo yuklanmadi'}`);
+                      } finally {
+                        setVideoUploading(false);
+                      }
+                    }}
+                    className="shrink-0 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+                  >
+                    {videoUploading ? 'Yuklanmoqda...' : 'Qo\'shish'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {(siteProfile.partnerBrokers || []).length > 0 && (
+              <div className="space-y-2">
+                {(siteProfile.partnerBrokers || []).map((b, i) => (
+                  <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2">
+                    <img src={b.logoUrl} alt={b.name} className="h-8 w-8 rounded object-contain bg-white" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{b.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{b.url || 'Havola yo\'q'}</p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!confirm(`"${b.name}" ni o'chirmoqchimisiz?`)) return;
+                        if (b.storagePath) {
+                          try {
+                            await deleteObject(ref(storage, b.storagePath));
+                          } catch {}
+                        }
+                        setSiteProfile((p) => ({ ...p, partnerBrokers: p.partnerBrokers.filter((_, j) => j !== i) }));
+                      }}
+                      className="shrink-0 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                    >O&apos;chirish</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60">Havolalarni saqlash</button>
+        </section>
+
+        {/* ═══ Robot .set fayllar ═══ */}
+        <section className="fath-shell rounded-3xl p-6 mt-6">
+          <h2 className="text-2xl font-black text-slate-900">Robot sozlamalari (.set fayllar)</h2>
+          <p className="mt-1 text-sm text-slate-600">5 ta profil uchun .set fayllarni yuklang. Saytdagi "Robot sozlamalari" sahifasida foydalaniladi.</p>
+          <div className="mt-4 space-y-3">
+            {[
+              { id: 'conservative', label: '🛡️ Konservativ', desc: 'Minimal risk, barqaror foyda' },
+              { id: 'cautious',     label: '🔵 Ehtiyotkor',  desc: 'Past risk, o\'rtacha foyda' },
+              { id: 'balanced',     label: '⚖️ Muvozanatli', desc: 'Optimal balans' },
+              { id: 'aggressive',   label: '🔥 Agressiv',    desc: 'Yuqori risk va foyda' },
+              { id: 'maximum',      label: '🚀 Maksimal',    desc: 'Eng yuqori risk va foyda' },
+              { id: 'prop-conservative', label: '🏢🛡️ Prop Konservativ', desc: 'Prop firma — past risk' },
+              { id: 'prop-cautious',     label: '🏢🔵 Prop Ehtiyotkor',  desc: 'Prop firma — o\'rtacha risk' },
+              { id: 'prop-balanced',     label: '🏢⚖️ Prop Muvozanatli', desc: 'Prop firma — optimal' },
+            ].map((profile) => {
+              const existing = siteProfile.robotProfiles?.find((p) => p.id === profile.id);
+              return (
+                <div key={profile.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 p-3">
+                  <div className="min-w-[140px]">
+                    <p className="font-semibold text-slate-800">{profile.label}</p>
+                    <p className="text-xs text-slate-500">{profile.desc}</p>
+                  </div>
+                  {existing ? (
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-700">✓ Yuklangan</span>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!confirm(`"${profile.label}" .set faylni o'chirmoqchimisiz?`)) return;
+                          if (existing.storagePath) {
+                            try { await deleteObject(ref(storage, existing.storagePath)); } catch {}
+                          }
+                          setSiteProfile((p) => ({ ...p, robotProfiles: (p.robotProfiles || []).filter((r) => r.id !== profile.id) }));
+                        }}
+                        className="rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700"
+                      >O&apos;chirish</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <input type="file" accept=".set" id={`set-${profile.id}`} className="text-xs" />
+                      <button
+                        type="button"
+                        disabled={videoUploading}
+                        onClick={async () => {
+                          const fileEl = document.getElementById(`set-${profile.id}`);
+                          const file = fileEl?.files?.[0];
+                          if (!file) { alert('.set faylni tanlang'); return; }
+                          if (file.size > 2 * 1024 * 1024) { alert('Fayl 2 MB dan oshmasligi kerak'); return; }
+
+                          setVideoUploading(true);
+                          try {
+                            const stamp = Date.now();
+                            const storagePath = `robot-sets/${profile.id}-${stamp}.set`;
+                            const storageRef = ref(storage, storagePath);
+                            await uploadBytes(storageRef, file, {
+                              contentType: 'application/octet-stream',
+                              customMetadata: { profile: profile.id, uploadedBy: auth.currentUser?.uid || '' },
+                            });
+                            const downloadUrl = await getDownloadURL(storageRef);
+                            setSiteProfile((p) => ({
+                              ...p,
+                              robotProfiles: [...(p.robotProfiles || []).filter((r) => r.id !== profile.id), { id: profile.id, name: profile.label, fileUrl: downloadUrl, storagePath }],
+                            }));
+                            fileEl.value = '';
+                            alert(`${profile.label} fayli yuklandi! "Saqlash" tugmasini bosing.`);
+                          } catch (error) { alert(`Xato: ${error.message}`); }
+                          finally { setVideoUploading(false); }
+                        }}
+                        className="rounded bg-cyan-600 px-3 py-1 text-xs font-semibold text-white hover:bg-cyan-700 disabled:opacity-60"
+                      >Yuklash</button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <button disabled={saving} onClick={updateSiteProfile} className="mt-4 rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-700 disabled:opacity-60">.set fayllarni saqlash</button>
         </section>
 
         <section className="fath-shell rounded-3xl p-6 mt-6">

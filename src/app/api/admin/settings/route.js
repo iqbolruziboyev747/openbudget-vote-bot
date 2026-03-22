@@ -43,6 +43,29 @@ export async function POST(request) {
               storagePath: String(v.storagePath || v.objectPath || '').trim(),
             })).filter((v) => v.url)
           : [],
+        homeVideos: Array.isArray(data.homeVideos)
+          ? data.homeVideos.map((v) => ({
+              title: String(v.title || '').trim(),
+              url: String(v.url || '').trim(),
+              storagePath: String(v.storagePath || v.objectPath || '').trim(),
+            })).filter((v) => v.url)
+          : [],
+        partnerBrokers: Array.isArray(data.partnerBrokers)
+          ? data.partnerBrokers.map((b) => ({
+              name: String(b.name || '').trim(),
+              url: String(b.url || '').trim(),
+              logoUrl: String(b.logoUrl || '').trim(),
+              storagePath: String(b.storagePath || '').trim(),
+            })).filter((b) => b.name && b.logoUrl)
+          : [],
+        robotProfiles: Array.isArray(data.robotProfiles)
+          ? data.robotProfiles.map((p) => ({
+              id: String(p.id || '').trim(),
+              name: String(p.name || '').trim(),
+              fileUrl: String(p.fileUrl || '').trim(),
+              storagePath: String(p.storagePath || '').trim(),
+            })).filter((p) => p.id && p.fileUrl)
+          : [],
         sellerBrand: String(data.sellerBrand || '').trim(),
         sellerOwnerFullName: String(data.sellerOwnerFullName || '').trim(),
         sellerLegalForm: String(data.sellerLegalForm || '').trim(),
